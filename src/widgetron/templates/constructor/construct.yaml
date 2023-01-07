@@ -1,9 +1,8 @@
 name: {{name}}
 version: {{version}}
-channels:{% for c in channels %}
+channels:
+  - local{% for c in channels %}
   - {{c}}{% endfor %}
-  - local  # allows to find the generated conda package
-  - conda-forge
 specs:
   - widgetron_app{% for package in dependencies %}
   - {{package}}{% endfor %}

@@ -43,8 +43,8 @@ parser.add_argument(
     '--channels', 
     required=False, 
     nargs='+',
-    help="List of conda channels required to find specified packages. Order is obeyed. Any specified channels are followed by local and conda-forge (so don't add either of those)",
-    default=[]
+    help="List of conda channels required to find specified packages. Order is obeyed, 'local' is always checked first. Default= ['conda-forge',]",
+    default=['conda-forge']
 )
 parser.add_argument(
     '-p', 

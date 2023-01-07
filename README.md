@@ -5,7 +5,7 @@ App bundler for ipywidgets
 2. Copies a designated notebook into a template python package
 3. Makes a conda-package to hold the notebook
    - By default, this package only depends on `python`, `conda`, `voila`, and `ipywidgets`. So if your widget requires more stuff you'll need to explicitly add them.
-   - Additional packages can be added to the `run` dependencies via the `-deps` parameter. e.g. `widgetron -f my_notebook.ipynb -deps numpy my_conda_package scipy`.
+   - Additional packages can be added to the `run` dependencies ([meta.yaml#L22](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/recipe/meta.yaml#L22)) via the `-deps` parameter. e.g. `widgetron -f my_notebook.ipynb -deps numpy my_conda_package scipy`.
    - These packages must be found either on `conda-forge` or in `local` (will add a `-c` arg soon)
 4. Builds an installer
 

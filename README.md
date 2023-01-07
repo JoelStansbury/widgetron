@@ -21,7 +21,7 @@ mamba activate ./.venv
 pip install ./src
 cd examples
 widgetron -h
-widgetron -f=my_notebook.ipynb -src=my_package
+widgetron -f=my_notebook.ipynb -src=my_package --icon=icon.ico
 ```
 
 ## Help

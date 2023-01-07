@@ -74,7 +74,7 @@ example usage: widgetron -f=my_notebook.ipynb
 
 
 ## Results
-After widgetron command the installer is placed in the current working directory
+After the `widgetron` command the installer is placed in the current working directory
 
 ![image](https://user-images.githubusercontent.com/48299585/211173752-212a2d77-9238-412f-81f8-0f942f276749.png)
 

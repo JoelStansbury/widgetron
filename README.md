@@ -1,7 +1,7 @@
 # widgetron
 App bundler for ipython notebooks
 
-1. Builds and packages a minimal electron interface to navigate to `localhost:8866`
+1. Builds and packages a minimal electron interface to navigate to `localhost:8866` and boot up the `voila` server
 2. Copies a notebook (specified by `-f`) into a template python package
 3. Copies the entire contents of the built electron application into the template python package.
 4. Optionally copies a source code directory (specified by `-src`), if provided, into the template python package.
@@ -12,6 +12,7 @@ App bundler for ipython notebooks
    - Additional packages can be added to the `run` dependencies ([meta.yaml#L22](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/recipe/meta.yaml#L22)) via the `-deps` parameter. e.g. `widgetron -f my_notebook.ipynb -deps numpy my_conda_package scipy`.
    - These packages must be found either on `conda-forge` or in `local` (will add a `-c` arg soon)
 5. Builds an installer
+   - The conda-package from step 4 includes a start menu shortcut to launch app
 
 ## Usage
 ```bash

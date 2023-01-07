@@ -15,7 +15,39 @@ conda env create -f environment.yaml -p ./.venv
 conda activate ./.venv
 pip install ./src
 cd examples
-widgetron -f=my_notebook.ipynb -src=my_package -deps numpy
+widgetron -h
+widgetron -f=my_notebook.ipynb -src=my_package
+```
+
+## Help
+```bash
+widgetron -h
+usage: widgetron [-h] -f FILE [-deps DEPENDENCIES [DEPENDENCIES ...]] [-p PORT] [-n NAME] [-o OUTDIR] [-v VERSION]
+                 [-env CONDA_PREFIX] [-src PYTHON_SOURCE_DIR] [--icon ICON]
+
+Creates an electron app for displaying the output cells of an interactive notebook.
+
+options:
+  -h, --help            show this help message and exit
+  -f FILE, --file FILE  Path to notebook to convert. (must be .ipynb)
+  -deps DEPENDENCIES [DEPENDENCIES ...], --dependencies DEPENDENCIES [DEPENDENCIES ...]
+                        List of conda-forge packages required to run the widget (pip packages are not supported).
+  -p PORT, --port PORT  4-digit port number on which the notebook will be hosted.
+  -n NAME, --name NAME  Name of the application (defaults to the notebook name).
+  -o OUTDIR, --outdir OUTDIR
+                        Output directory.
+  -v VERSION, --version VERSION
+                        App version number.
+  -env CONDA_PREFIX, --conda_prefix CONDA_PREFIX
+                        Environment to package with the installer (defaults to the active conda environment).
+  -src PYTHON_SOURCE_DIR, --python_source_dir PYTHON_SOURCE_DIR
+                        Use with caution. This is a shortcut to avoid needing to build a conda package for your source
+                        code. Widgetron is basically a big jinja template, if your notebook has `from my_package
+                        import my_widget` then you would pass C:/path/to/my_package, and the directory will by copied
+                        recursively into a package shell immediately next to the notebook.
+  --icon ICON           Icon for app.
+
+example usage: widgetron -f=my_notebook.ipynb
 ```
 
 ## TODO

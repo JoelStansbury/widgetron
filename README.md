@@ -10,7 +10,6 @@ App bundler for ipython notebooks
 4. Makes a conda-package out of the python package template to hold the notebook, electron app, and source code if provided.
    - By default, this package only depends on `python`, `conda`, `voila`, and `ipywidgets`. So if your widget requires more stuff you'll need to explicitly add them.
    - Additional packages can be added to the `run` dependencies ([meta.yaml#L22](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/recipe/meta.yaml#L22)) via the `-deps` parameter. e.g. `widgetron -f my_notebook.ipynb -deps numpy my_conda_package scipy`.
-   - These packages must be found either on `conda-forge` or in `local` (will add a `-c` arg soon)
 5. Builds an installer
    - The conda-package from step 4 includes a start menu shortcut to launch app
 
@@ -62,7 +61,7 @@ example usage: widgetron -f=my_notebook.ipynb
 - Test on mac and linux
 - Quit `voila` programatically
   - `voila` is launched on [main.js#L8](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/electron/main.js#L8). It seems to disconnect `voila` from the spawned process somehow, so it's proving difficult to kill.
-- Clean up version control and property propagation.
+- Clean up metadata propagation.
 - Allow multiple `-src` directories
 - Investigate the possibility to bundle multiple notebooks (I think I saw somewhere that `voila` can host more than one)
 - Upload to pypi and conda-forge

@@ -1,3 +1,7 @@
+logs
+**/widgetron_temp_files
+**/*.exe
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

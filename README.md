@@ -11,8 +11,8 @@ App bundler for ipywidgets
 
 ## Usage
 ```bash
-conda env create -f environment.yaml -p ./.venv
-conda activate ./.venv
+mamba env create -f environment.yaml -p ./.venv
+mamba activate ./.venv
 pip install ./src
 cd examples
 widgetron -h

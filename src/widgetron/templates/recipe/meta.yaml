@@ -7,7 +7,7 @@ source:
 
 build:
   number: 0
-  script: python -m pip install .
+  script: python -m pip install .  # [not win]
 
 requirements:
   host:
@@ -16,7 +16,12 @@ requirements:
 
   run:
     - python
+    - menuinst >=1.4.17
     - voila
     - conda
     - ipywidgets{% for package in dependencies %}
     - {{package}}{% endfor %}
+
+test:
+  commands:
+    - if not exist %PREFIX%\\Menu\\widgetron_shortcut.json exit 1  # [win]

@@ -5,6 +5,7 @@ import platform
 from pathlib import Path
 import shutil
 from subprocess import call
+import json
 
 from .jinja_functions import render
 
@@ -64,13 +65,6 @@ parser.add_argument(
     help="App version number.", 
     default=1
 )
-parser.add_argument(
-    '-env', 
-    '--conda_prefix', 
-    required=False, 
-    help="Environment to package with the installer (defaults to the active conda environment).", 
-    default=str(CONDA_PREFIX)
-)
 src_desc = """
 Use with caution.
 This is a shortcut to avoid needing to build a conda package for your source code.
@@ -95,7 +89,7 @@ def cli():
 
     
     if not kwargs["file"].endswith(".ipynb"):
-        print(f"ERROR: file must have (.ipynb) extension. Not ({Path(args['file']).suffix})")
+        print(f"ERROR: file must have (.ipynb) extension. Not ({Path(kwargs['file']).suffix})")
         return
     else:
         # Use notebook name if not defined
@@ -139,6 +133,22 @@ def cli():
             shell=WIN
         )
         os.chdir(str(cwd))  # go back
+
+        # Create Windows shortcut files
+        electron_package_dir = kwargs["temp_files"] / "server/widgetron_app"
+        exe_path = list(electron_package_dir.rglob("*.exe"))[0].relative_to(electron_package_dir)
+        data = {
+            "menu_name": f'{kwargs["name"]}',
+            "menu_items":
+            [
+                {
+                    "name": f'{kwargs["name"]}',
+                    "system": '${ROOT_PREFIX}\\lib\\site-packages\\widgetron_app\\' + '\\'.join(exe_path.parts)
+                }
+            ]
+        }
+        with open(kwargs["temp_files"] / "recipe/widgetron_shortcut.json", "w") as f:
+            json.dump(data, f)
 
         # Build conda-package
         call(

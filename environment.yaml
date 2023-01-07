@@ -10,3 +10,6 @@ dependencies:
   - boa
   - voila
   - nodejs
+  - jupyterlab
+  - black
+  - isort

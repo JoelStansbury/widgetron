@@ -11,7 +11,7 @@ At the moment, it only works on Windows, but there are plans to address cross-pl
    - Must be a valid python package (i.e. the folder must contain `__init__.py`)
 4. Makes a conda-package out of the python package template to hold the notebook, electron app, and source code if provided.
    - By default, this package only depends on `python`, `conda`, `voila`, and `ipywidgets`. So if your widget requires more stuff you'll need to explicitly add them.
-   - Additional packages can be added to the `run` dependencies ([meta.yaml#L22](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/recipe/meta.yaml#L22)) via the `-deps` parameter. e.g. `widgetron -f my_notebook.ipynb -deps numpy my_conda_package scipy`.
+   - Additional packages can be added to the `run` dependencies via the `-deps` parameter (see example).
 5. Builds an installer
    - The conda-package from step 4 includes a start menu shortcut to launch app
 

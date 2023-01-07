@@ -39,6 +39,9 @@ options:
   -f FILE, --file FILE  Path to notebook to convert. (must be .ipynb)
   -deps DEPENDENCIES [DEPENDENCIES ...], --dependencies DEPENDENCIES [DEPENDENCIES ...]
                         List of conda-forge packages required to run the widget (pip packages are not supported).
+  -c CHANNELS [CHANNELS ...], --channels CHANNELS [CHANNELS ...]
+                        List of conda channels required to find specified packages. Order is obeyed. Any specified
+                        channels are followed by local and conda-forge (so don't add either of those)
   -p PORT, --port PORT  4-digit port number on which the notebook will be hosted.
   -n NAME, --name NAME  Name of the application (defaults to the notebook name).
   -o OUTDIR, --outdir OUTDIR
@@ -56,7 +59,6 @@ example usage: widgetron -f=my_notebook.ipynb
 ```
 
 ## TODO
-- Add `-c` arg for conda channels
 - Test on mac and linux
 - Quit `voila` programatically
   - `voila` is launched on [main.js#L8](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/electron/main.js#L8). It seems to disconnect `voila` from the spawned process somehow, so it's proving difficult to kill.

@@ -39,6 +39,14 @@ parser.add_argument(
     default=[]
 )
 parser.add_argument(
+    '-c', 
+    '--channels', 
+    required=False, 
+    nargs='+',
+    help="List of conda channels required to find specified packages. Order is obeyed. Any specified channels are followed by local and conda-forge (so don't add either of those)",
+    default=[]
+)
+parser.add_argument(
     '-p', 
     '--port', 
     required=False, 

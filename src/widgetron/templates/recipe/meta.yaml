@@ -19,8 +19,7 @@ requirements:
     - menuinst >=1.4.17
     - voila
     - conda
-    - ipywidgets{% for package in dependencies %}
-    - {{package}}{% endfor %}
+    - ipywidgets
 
 test:
   commands:

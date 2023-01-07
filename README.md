@@ -59,7 +59,21 @@ options:
 example usage: widgetron -f=my_notebook.ipynb
 ```
 
-## Result
+## TODO
+- Test on mac and linux
+- Hide menu bar. It does nothing
+- Taskbar icon is not correct (uses default electron icon)
+- Quit `voila` programatically
+  - `voila` is launched on [main.js#L8](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/electron/main.js#L8). It seems to disconnect `voila` from the spawned process somehow, so it's proving difficult to kill.
+- Clean up metadata propagation.
+- Allow multiple `-src` directories
+- Investigate the possibility to bundle multiple notebooks (I think I saw somewhere that `voila` can host more than one)
+- Upload to pypi and conda-forge
+- Better page loading
+  - I only saw this once during development, but `index.html` redirected to `localhost:8866` before `voila` finished booting up and the app was unresponsive.
+
+
+## Results
 After widgetron command the installer is placed in the current working directory
 
 ![image](https://user-images.githubusercontent.com/48299585/211173752-212a2d77-9238-412f-81f8-0f942f276749.png)
@@ -77,15 +91,3 @@ Window
 ![image](https://user-images.githubusercontent.com/48299585/211173814-af05502c-2c41-4bd1-ad09-324a9eccef78.png)
 
 
-## TODO
-- Test on mac and linux
-- Hide menu bar. It does nothing
-- Taskbar icon is not correct (uses default electron icon)
-- Quit `voila` programatically
-  - `voila` is launched on [main.js#L8](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/electron/main.js#L8). It seems to disconnect `voila` from the spawned process somehow, so it's proving difficult to kill.
-- Clean up metadata propagation.
-- Allow multiple `-src` directories
-- Investigate the possibility to bundle multiple notebooks (I think I saw somewhere that `voila` can host more than one)
-- Upload to pypi and conda-forge
-- Better page loading
-  - I only saw this once during development, but `index.html` redirected to `localhost:8866` before `voila` finished booting up and the app was unresponsive.

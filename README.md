@@ -57,3 +57,9 @@ example usage: widgetron -f=my_notebook.ipynb
 - Test on mac and linux
 - Quit `voila` programatically
   - `voila` is launched on [main.js#L8](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/electron/main.js#L8). It seems to disconnect `voila` from the spawned process somehow, so it's proving difficult to kill.
+- Clean up version control and property propagation.
+- Allow multiple `-src` directories
+- Investigate the possibility to bundle multiple notebooks (I think I saw somewhere that `voila` can host more than one)
+- Upload to pypi and conda-forge
+- Better page loading
+  - I only saw this once during development, but `index.html` redirected to `localhost:8866` before `voila` finished booting up and the app was unresponsive.

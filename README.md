@@ -22,6 +22,8 @@ widgetron -f=my_notebook.ipynb -src=my_package
 ## Help
 ```bash
 widgetron -h
+```
+```
 usage: widgetron [-h] -f FILE [-deps DEPENDENCIES [DEPENDENCIES ...]] [-p PORT] [-n NAME] [-o OUTDIR] [-v VERSION]
                  [-env CONDA_PREFIX] [-src PYTHON_SOURCE_DIR] [--icon ICON]
 

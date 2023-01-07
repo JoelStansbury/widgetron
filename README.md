@@ -1,4 +1,4 @@
-# wigetron
+# widgetron
 App bundler for ipywidgets
 ## TODO
 - Make a shortcut for the exe (maybe via post_install script)

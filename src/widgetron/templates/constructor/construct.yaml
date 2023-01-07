@@ -5,3 +5,4 @@ channels:
   - conda-forge
 specs:
   - widgetron_app
+register_python_default: false

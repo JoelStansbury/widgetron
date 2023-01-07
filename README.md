@@ -1,10 +1,12 @@
 # widgetron
-App bundler for ipywidgets
+App bundler for ipython notebooks
 
-1. Builds and packages a simple electron interface to navigate to `localhost:8866`
-2. Copies a designated notebook into a template python package
+1. Builds and packages a minimal electron interface to navigate to `localhost:8866`
+2. Copies a notebook (specified by `-f`) into a template python package
+3. Copies the entire contents of the built electron application into the template python package.
+4. Copies a source code directory (specified by `-src`) into the template python package.
    - The package specifies `**` for package_data so be sure to clean out any `__pycache__` folders and other garbage.
-3. Copies the entire contents of the built electron application into the template python package as well.
+   - Must be a valid python package (i.e. the folder must contain `__init__.py`)
 4. Makes a conda-package out of the python package template to hold the notebook, electron app, and source code if provided.
    - By default, this package only depends on `python`, `conda`, `voila`, and `ipywidgets`. So if your widget requires more stuff you'll need to explicitly add them.
    - Additional packages can be added to the `run` dependencies ([meta.yaml#L22](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/recipe/meta.yaml#L22)) via the `-deps` parameter. e.g. `widgetron -f my_notebook.ipynb -deps numpy my_conda_package scipy`.

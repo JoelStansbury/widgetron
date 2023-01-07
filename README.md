@@ -4,7 +4,7 @@ App bundler for ipython notebooks
 1. Builds and packages a minimal electron interface to navigate to `localhost:8866`
 2. Copies a notebook (specified by `-f`) into a template python package
 3. Copies the entire contents of the built electron application into the template python package.
-4. Copies a source code directory (specified by `-src`) into the template python package.
+4. Optionally copies a source code directory (specified by `-src`), if provided, into the template python package.
    - The package specifies `**` for package_data so be sure to clean out any `__pycache__` folders and other garbage.
    - Must be a valid python package (i.e. the folder must contain `__init__.py`)
 4. Makes a conda-package out of the python package template to hold the notebook, electron app, and source code if provided.

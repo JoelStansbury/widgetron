@@ -40,8 +40,6 @@ options:
                         Output directory.
   -v VERSION, --version VERSION
                         App version number.
-  -env CONDA_PREFIX, --conda_prefix CONDA_PREFIX
-                        Environment to package with the installer (defaults to the active conda environment).
   -src PYTHON_SOURCE_DIR, --python_source_dir PYTHON_SOURCE_DIR
                         Use with caution. This is a shortcut to avoid needing to build a conda package for your source
                         code. Widgetron is basically a big jinja template, if your notebook has `from my_package

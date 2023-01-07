@@ -1,0 +1,7 @@
+name: {{name}}
+version: {{version}}
+channels:
+  - local  # allows to find the generated conda package
+  - conda-forge
+specs:
+  - widgetron_app

@@ -1,0 +1,17 @@
+{
+  "name": "{{name}}",
+  "version": "{{version}}",
+  "description": "{{description}}",
+  "main": "main.js",
+  "author": "{{author}}",
+  "license": "{{license}}",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "electron-packager": "^17.1.1",
+    "electron": "^22.0.0"
+  }
+}

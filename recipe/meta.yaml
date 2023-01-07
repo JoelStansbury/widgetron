@@ -1,0 +1,22 @@
+package:
+  name: widgetron
+  version: 1
+
+source:
+  path: ../src  # relative to this file
+
+build:
+  number: 0
+  script: python -m pip install .
+
+requirements:
+  host:
+    - python
+    - pip
+
+  run:
+    - python
+    - jinja2
+    - constructor
+    - nsis
+    - boa

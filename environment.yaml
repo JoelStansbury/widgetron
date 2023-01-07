@@ -1,0 +1,12 @@
+name: dev
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python
+  - constructor
+  - nsis
+  - boa
+  - voila
+  - nodejs

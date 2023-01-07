@@ -1,0 +1,22 @@
+package:
+  name: widgetron_app
+  version: 1
+
+source:
+  path: ../server  # relative to this file
+
+build:
+  number: 0
+  script: python -m pip install .
+
+requirements:
+  host:
+    - python
+    - pip
+
+  run:
+    - python
+    - voila
+    - conda
+    - ipywidgets{% for package in dependencies %}
+    - {{package}}{% endfor %}

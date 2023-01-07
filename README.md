@@ -4,3 +4,4 @@ App bundler for ipywidgets
 - Make a shortcut for the exe (maybe via post_install script)
 - Test on mac and linux
 - Make `.ico` file to finalize the example
+- Quit `voila` programatically

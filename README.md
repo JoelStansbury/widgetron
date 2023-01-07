@@ -79,6 +79,7 @@ Window
 
 ## TODO
 - Test on mac and linux
+- Hide menu bar. It does nothing
 - Taskbar icon is not correct (uses default electron icon)
 - Quit `voila` programatically
   - `voila` is launched on [main.js#L8](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/electron/main.js#L8). It seems to disconnect `voila` from the spawned process somehow, so it's proving difficult to kill.

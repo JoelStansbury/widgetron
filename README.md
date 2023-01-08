@@ -24,33 +24,34 @@ pip install widgetron
 widgetron -h
 ```
 ```
-usage: widgetron [-h] -f FILE [-deps DEPENDENCIES [DEPENDENCIES ...]] [-p PORT] [-n NAME] [-o OUTDIR] [-v VERSION]
-                 [-env CONDA_PREFIX] [-src PYTHON_SOURCE_DIR] [--icon ICON]
+usage: widgetron [-h] [-deps DEPENDENCIES [DEPENDENCIES ...]] [-c CHANNELS [CHANNELS ...]] [-p PORT] [-n NAME] [-o OUTDIR] [-v VERSION]
+                 [-src PYTHON_SOURCE_DIR] [-icon ICON]
+                 file
 
 Creates an electron app for displaying the output cells of an interactive notebook.
 
+positional arguments:
+  file                  Path to notebook to convert. (must be .ipynb)
+
 options:
   -h, --help            show this help message and exit
-  -f FILE, --file FILE  Path to notebook to convert. (must be .ipynb)
   -deps DEPENDENCIES [DEPENDENCIES ...], --dependencies DEPENDENCIES [DEPENDENCIES ...]
                         List of conda-forge packages required to run the widget (pip packages are not supported).
   -c CHANNELS [CHANNELS ...], --channels CHANNELS [CHANNELS ...]
-                        List of conda channels required to find specified packages. Order is obeyed. Any specified
-                        channels are followed by local and conda-forge (so don't add either of those)
+                        List of conda channels required to find specified packages. Order is obeyed, 'local' is always checked first.
+                        Default= ['conda-forge',]
   -p PORT, --port PORT  4-digit port number on which the notebook will be hosted.
   -n NAME, --name NAME  Name of the application (defaults to the notebook name).
   -o OUTDIR, --outdir OUTDIR
-                        Output directory.
-  -v VERSION, --version VERSION
                         App version number.
+  -v VERSION, --version VERSION
   -src PYTHON_SOURCE_DIR, --python_source_dir PYTHON_SOURCE_DIR
-                        Use with caution. This is a shortcut to avoid needing to build a conda package for your source
-                        code. Widgetron is basically a big jinja template, if your notebook has `from my_package
-                        import my_widget` then you would pass C:/path/to/my_package, and the directory will by copied
-                        recursively into a package shell immediately next to the notebook.
-  --icon ICON           Icon for app.
-
-example usage: widgetron -f=my_notebook.ipynb
+                        This is a shortcut to avoid needing to build a conda package for your source code. Widgetron is basically a big
+                        jinja template, if your notebook has `from my_package import my_widget` then you would pass
+                        C:/path/to/my_package, and the directory will by copied recursively into a package shell immediately next to the
+                        notebook.
+  -icon ICON, --icon ICON
+                        Icon for app. Must be a .ico file
 ```
 
 ## TODO

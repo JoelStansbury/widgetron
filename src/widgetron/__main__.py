@@ -23,8 +23,7 @@ CONDA_BUILD = "conda-mambabuild {} -c conda-forge"
 
 parser = argparse.ArgumentParser(
     prog="widgetron",
-    description="Creates an electron app for displaying the output cells of an interactive notebook.",
-    epilog="example usage: widgetron -f=my_notebook.ipynb",
+    description="Creates an electron app for displaying the output cells of an interactive notebook."
 )
 
 src_desc = """

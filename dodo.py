@@ -41,13 +41,13 @@ class CONDA:
 
 class PyPi:
     update_build_deps = "python -m pip install --upgrade build twine"
-    build = "python -m build --outdir dist/pypi"
+    build = "python -m build --outdir dist/pypi ./src"
     upload = f"python -m twine upload --repository pypi dist/pypi/* -u {PYPI_USERNAME} -p {PYPI_PASSWORD}"
     distribute = f"{update_build_deps} && {build} && {upload}"
 
 # Formatting
-sort_imports = "isort ipypdf/ tests/"
-black_format = "black ipypdf/ tests/ -l 79"
+sort_imports = "isort src"
+black_format = "black src -l 79"
 CLEAN = f"{CONDA.activate} && {sort_imports} && {black_format}"
 
 def task_update_deps():
@@ -73,13 +73,13 @@ def task_lab():
     }
 
 
-# def task_publish():
-#     return {
-#         "actions": [
-#             f"{CONDA.activate} && {CLEAN} && {PyPi.distribute}"
-#         ],
-#         "verbosity": 2,
-#     }
+def task_publish():
+    return {
+        "actions": [
+            f"{CLEAN} && {PyPi.distribute}"
+        ],
+        "verbosity": 2,
+    }
 
 
 def task_condabuild():

@@ -17,9 +17,8 @@ At the moment, it only works on Windows, but there are plans to address cross-pl
 
 ## Usage
 ```bash
-mamba env create -f environment.yaml -p ./.venv
-mamba activate ./.venv
-pip install ./src
+mamba install boa constructor nsis nodejs -c conda-forge
+pip install widgetron
 cd examples
 widgetron -h
 widgetron -f=my_notebook.ipynb -src=my_package --icon=icon.ico

@@ -10,10 +10,8 @@ At the moment, it only works on Windows, but there are plans to address cross-pl
    - The package specifies `**` for package_data so be sure to clean out any `__pycache__` folders and other garbage.
    - Must be a valid python package (i.e. the folder must contain `__init__.py`)
 4. Makes a conda-package out of the python package template to hold the notebook, electron app, and source code if provided.
-   - By default, this package only depends on `python`, `conda`, `voila`, and `ipywidgets`. So if your widget requires more stuff you'll need to explicitly add them.
-   - Additional packages can be added to the `run` dependencies ([meta.yaml#L22](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/recipe/meta.yaml#L22)) via the `-deps` parameter. e.g. `widgetron -f my_notebook.ipynb -deps numpy my_conda_package scipy`.
 5. Builds an installer
-   - The conda-package from step 4 includes a start menu shortcut to launch app
+   - Conda dependencies are specified with the `-deps` parameter (see example).
 
 ## Usage
 ```bash
@@ -60,6 +58,8 @@ example usage: widgetron -f=my_notebook.ipynb
 
 ## TODO
 - Test on mac and linux
+- Hide menu bar. It does nothing
+- Taskbar icon is not correct (uses default electron icon)
 - Quit `voila` programatically
   - `voila` is launched on [main.js#L8](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/electron/main.js#L8). It seems to disconnect `voila` from the spawned process somehow, so it's proving difficult to kill.
 - Clean up metadata propagation.
@@ -68,3 +68,23 @@ example usage: widgetron -f=my_notebook.ipynb
 - Upload to pypi and conda-forge
 - Better page loading
   - I only saw this once during development, but `index.html` redirected to `localhost:8866` before `voila` finished booting up and the app was unresponsive.
+
+
+## Results
+After the `widgetron` command the installer is placed in the current working directory
+
+![image](https://user-images.githubusercontent.com/48299585/211173752-212a2d77-9238-412f-81f8-0f942f276749.png)
+
+Running the installer
+
+![image](https://user-images.githubusercontent.com/48299585/211173763-fc7b54ad-c8cf-4386-94d8-cfc90cdb77d8.png)
+
+Startmenu Shortcut
+
+![image](https://user-images.githubusercontent.com/48299585/211173745-9142808c-6303-4925-b1f2-d7db21430df1.png)
+
+Window
+
+![image](https://user-images.githubusercontent.com/48299585/211173814-af05502c-2c41-4bd1-ad09-324a9eccef78.png)
+
+Profit

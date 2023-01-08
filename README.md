@@ -13,13 +13,17 @@ At the moment, it only works on Windows, but there are plans to address cross-pl
 5. Builds an installer
    - Conda dependencies are specified with the `-deps` parameter (see example).
 
-## Usage
+## Installation
 ```bash
 mamba install boa constructor nsis nodejs -c conda-forge
 pip install widgetron
-cd examples
-widgetron -h
-widgetron -f=my_notebook.ipynb -src=my_package --icon=icon.ico
+```
+
+## Example Usage
+```
+git clone https://github.com/JoelStansbury/widgetron.git
+cd widgetron/examples
+widgetron -f my_notebook.ipynb -src my_package --icon icon.ico -deps numpy matplotlib
 ```
 
 ## Help

@@ -19,7 +19,7 @@ def _render(template_path, **kwargs):
     return template.render(**kwargs)
 
 
-def render(**kwargs):
+def render_templates(**kwargs):
     """
     Renders all templates, replacing all instances of {{kw}} with the value
     provided in kwargs.

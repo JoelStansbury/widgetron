@@ -19,13 +19,6 @@ mamba install boa constructor nsis nodejs -c conda-forge
 pip install widgetron
 ```
 
-## Example Usage
-```
-git clone https://github.com/JoelStansbury/widgetron.git
-cd widgetron/examples
-widgetron -f my_notebook.ipynb -src my_package --icon icon.ico -deps numpy matplotlib
-```
-
 ## Help
 ```bash
 widgetron -h
@@ -74,7 +67,14 @@ example usage: widgetron -f=my_notebook.ipynb
   - I only saw this once during development, but `index.html` redirected to `localhost:8866` before `voila` finished booting up and the app was unresponsive.
 
 
-## Results
+## Example Usage
+```
+git clone https://github.com/JoelStansbury/widgetron.git
+cd widgetron/examples
+widgetron -f my_notebook.ipynb -src my_package --icon icon.ico -deps numpy matplotlib
+```
+
+### Results
 After the `widgetron` command the installer is placed in the current working directory
 
 ![image](https://user-images.githubusercontent.com/48299585/211173752-212a2d77-9238-412f-81f8-0f942f276749.png)

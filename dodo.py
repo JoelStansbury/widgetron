@@ -32,18 +32,17 @@ class CONDA:
     activate = f'{_conda} activate "{ENV_PATH}"'
     build = f"{activate} && conda mambabuild recipe --output-folder dist/conda -c conda-forge"
 
-class PyPi:
-    update_build_deps = "python -m pip install --upgrade build twine"
-    build = f"python -m build --outdir dist/pypi {SRC}"
-    upload = "echo Unauthorized"
-    distribute = "echo Unauthorized"
 try:
     with open("../keys/pypi", "r") as f:
         PYPI_USERNAME, PYPI_PASSWORD = f.read().strip().split()
-    PyPi.upload = f"python -m twine upload --repository pypi dist/pypi/* -u {PYPI_USERNAME} -p {PYPI_PASSWORD}"
-    PyPi.distribute = f"{CONDA.activate} && {update_build_deps} && {build} && {upload}"
 except Exception as e:
     print("Could not find PyPi credentials... PyPi Distribution Disabled")
+
+class PyPi:
+    update_build_deps = "python -m pip install --upgrade build twine"
+    build = f"python -m build --outdir dist/pypi {SRC}"
+    upload = f"python -m twine upload --repository pypi dist/pypi/* -u {PYPI_USERNAME} -p {PYPI_PASSWORD}"
+    distribute = f"{CONDA.activate} && {update_build_deps} && {build} && {upload}"
 
 sort_imports = f"isort {SRC}"
 black_format = f"black {SRC} -l 79"

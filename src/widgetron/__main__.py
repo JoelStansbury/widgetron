@@ -16,14 +16,12 @@ WIN = platform.system() == "Windows"
 
 INSTALL_ELECTRON = "npm install --save-dev electron"
 INSTALL_ELECTRON_PACKAGER = "npm install --save-dev electron-packager"
-PACKAGE_ELECTRON_APPLICATION = (
-    "npx electron-packager . --out=../server/widgetron_app --ignore=node_modules"
-)
+PACKAGE_ELECTRON_APPLICATION = "npx electron-packager . --out=../server/widgetron_app --ignore=node_modules"
 CONDA_BUILD = "conda-mambabuild {} -c conda-forge"
 
 parser = argparse.ArgumentParser(
     prog="widgetron",
-    description="Creates an electron app for displaying the output cells of an interactive notebook."
+    description="Creates an electron app for displaying the output cells of an interactive notebook.",
 )
 
 src_desc = """

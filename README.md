@@ -1,6 +1,6 @@
 # widgetron
 App bundler for ipython notebooks.
-This command line utility builds a standalone executable installer for a single ipython notebook. It is intended for applications build with ipywidgets.
+This command line utility builds a standalone executable installer for a single ipython notebook. It is intended for applications built with ipywidgets.
 At the moment, it only works on Windows, but there are plans to address cross-platform support.
 
 1. Builds and packages a minimal electron interface to navigate to `localhost:8866` and boot up the `voila` server

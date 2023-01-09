@@ -55,6 +55,7 @@ options:
 ```
 
 ## TODO
+- Install from PyPi makes __pycache__ for template folder. This breaks the tool
 - Test on mac and linux
 - Hide menu bar. It does nothing
 - Taskbar icon is not correct (uses default electron icon)

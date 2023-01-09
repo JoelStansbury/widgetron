@@ -36,5 +36,7 @@ def render_templates(**kwargs):
             subdir = "/".join(intermediate_folders[: i + 1])
             (outdir / subdir).mkdir(exist_ok=True)
 
-        with open(outdir / rel, "w") as f:
+        p = outdir / rel
+        p = p.with_suffix(p.suffix.replace("_template",""))
+        with open(p, "w") as f:
             f.write(_render("/".join(rel.parts), **kwargs))

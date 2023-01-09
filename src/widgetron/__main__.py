@@ -17,7 +17,7 @@ WIN = platform.system() == "Windows"
 INSTALL_ELECTRON = "npm install --save-dev electron"
 INSTALL_ELECTRON_PACKAGER = "npm install --save-dev electron-packager"
 PACKAGE_ELECTRON_APPLICATION = (
-    "npx electron-packager . --out=../server/widgetron_app"
+    "npx electron-packager . --out=../server/widgetron_app --ignore=node_modules"
 )
 CONDA_BUILD = "conda-mambabuild {} -c conda-forge"
 

@@ -55,25 +55,22 @@ options:
 ```
 
 ## TODO
-- Install from PyPi makes __pycache__ for template folder. This breaks the tool
 - Test on mac and linux
-- Hide menu bar. It does nothing
-- Taskbar icon is not correct (uses default electron icon)
 - Quit `voila` programatically
   - `voila` is launched on [main.js#L8](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/electron/main.js#L8). It seems to disconnect `voila` from the spawned process somehow, so it's proving difficult to kill.
 - Clean up metadata propagation.
 - Allow multiple `-src` directories
 - Investigate the possibility to bundle multiple notebooks (I think I saw somewhere that `voila` can host more than one)
-- Upload to pypi and conda-forge
+- Upload to conda-forge
 - Better page loading
-  - I only saw this once during development, but `index.html` redirected to `localhost:8866` before `voila` finished booting up and the app was unresponsive.
+  - Sometimes `index.html` is redirected to `localhost:8866` before `voila` finished booting up and the app is unresponsive requiring manual reload of UI.
 
 
 ## Example Usage
 ```
 git clone https://github.com/JoelStansbury/widgetron.git
 cd widgetron/examples
-widgetron -f my_notebook.ipynb -src my_package --icon icon.ico -deps numpy matplotlib
+widgetron my_notebook.ipynb -src my_package -icon icon.ico -deps numpy matplotlib
 ```
 
 ### Results

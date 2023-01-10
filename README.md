@@ -56,6 +56,7 @@ options:
 
 ## TODO
 - Test on mac and linux
+   > __constructor__ is not available through conda-forge on __osx-arm64__
 - Quit `voila` programatically
   - `voila` is launched on [main.js#L8](https://github.com/JoelStansbury/widgetron/blob/main/src/widgetron/templates/electron/main.js#L8). It seems to disconnect `voila` from the spawned process somehow, so it's proving difficult to kill.
 - Clean up metadata propagation.

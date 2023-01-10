@@ -164,7 +164,7 @@ def cli():
     handle_source_code(kwargs)
     copy_notebook(kwargs)
     package_electron_app(kwargs)
-    create_windows_menu_file(kwargs)
+    if WIN: create_windows_menu_file(kwargs)
     build_conda_package(kwargs)
     build_installer(kwargs)
 

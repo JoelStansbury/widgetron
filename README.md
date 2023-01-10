@@ -51,7 +51,7 @@ options:
                         C:/path/to/my_package, and the directory will by copied recursively into a package shell immediately next to the
                         notebook.
   -icon ICON, --icon ICON
-                        Icon for app. Must be a .ico file
+                        Icon for app. Must be a .ico (Windows) or .icns (osx)
 ```
 
 ## TODO

@@ -113,10 +113,10 @@ def package_electron_app(kwargs):
 
     os.chdir(str(kwargs["temp_files"] / "electron"))
 
-    call("npm install", shell=WIN)
+    call("npm install .", shell=True)
     call(
         PACKAGE_ELECTRON_APPLICATION + extra,
-        shell=WIN,
+        shell=True,
     )
     os.chdir(str(cwd))
 

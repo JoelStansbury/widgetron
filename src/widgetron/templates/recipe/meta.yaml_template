@@ -16,7 +16,7 @@ requirements:
 
   run:
     - python
-    - menuinst >=1.4.17
+    - menuinst >=1.4.17  # [win]
     - voila
     - conda
     - ipywidgets

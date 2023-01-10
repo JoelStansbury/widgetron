@@ -2,11 +2,11 @@ name: dev
 
 channels:
   - conda-forge
+  # - main  # Uncomment if using osx-arm64 install of python
 
 dependencies:
   - python
   - constructor
-  - nsis
   - boa
   - voila
   - nodejs

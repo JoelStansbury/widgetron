@@ -70,7 +70,9 @@ options:
 ## Example Usage
 ```
 git clone https://github.com/JoelStansbury/widgetron.git
-cd widgetron/examples
+cd widgetron
+pip install ./src
+cd examples
 widgetron my_notebook.ipynb -src my_package -icon icon.ico -deps numpy matplotlib
 ```
 

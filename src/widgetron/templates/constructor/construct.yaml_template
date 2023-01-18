@@ -4,6 +4,11 @@ channels:
   - local{% for c in channels %}
   - {{c}}{% endfor %}
 specs:
-  - widgetron_app{% for package in dependencies %}
+  - conda
+  - python
+  - widgetron_app
+  - menuinst >=1.4.17  # [win]
+  - voila
+  - ipywidgets{% for package in dependencies %}
   - {{package}}{% endfor %}
 register_python_default: false

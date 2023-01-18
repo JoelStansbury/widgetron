@@ -150,12 +150,12 @@ def create_windows_menu_file(kwargs):
 
 def build_conda_package(kwargs):
     dir = kwargs["temp_files"] / "recipe"
-    call(CONDA_BUILD.format(dir), shell=WIN)
+    call(CONDA_BUILD.format(dir), shell=True)
 
 
 def build_installer(kwargs):
     dir = kwargs["temp_files"] / "constructor"
-    call(f"constructor {dir}", shell=WIN)
+    call(f"constructor {dir}", shell=True)
 
 
 def cli():

@@ -14,13 +14,6 @@ requirements:
     - python
     - pip
 
-  run:
-    - python
-    - menuinst >=1.4.17  # [win]
-    - voila
-    - conda
-    - ipywidgets
-
 test:
   commands:
     - if not exist %PREFIX%\\Menu\\widgetron_shortcut.json exit 1  # [win]

@@ -3,7 +3,7 @@
     "menu_items": [
         {
             "name": "{{name}}",
-            "script": "python -m widgetron_app",
+            "script": "${PREFIX}/Scripts/activate.bat && python -m widgetron_app",
             "icon": "${MENU_DIR}/widgetron_icon.ico"
         }
     ]

@@ -8,3 +8,7 @@ packages = find:
 
 [options.package_data]
 widgetron_app = **
+
+[options.entry_points]
+    console_scripts = 
+        {{name}} = widgetron.cli:main

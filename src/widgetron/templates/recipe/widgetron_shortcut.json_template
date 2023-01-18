@@ -1,0 +1,10 @@
+{
+    "menu_name": "{{name}}",
+    "menu_items": [
+        {
+            "name": "{{name}}",
+            "script": "{{name}}",
+            "icon": "${MENU_DIR}/widgetron_icon.ico"
+        }
+    ]
+}

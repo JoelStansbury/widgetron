@@ -1,0 +1,46 @@
+import subprocess
+from pathlib import Path
+import platform
+import os, signal
+import threading
+import psutil
+
+HERE = Path(__file__).parent
+
+SYS = platform.uname().system
+if SYS == "Windows":
+    UI = str(next(HERE.rglob("*.exe")).absolute())
+else:
+    UI = "{{name}}"
+
+class VoilaServer(threading.Thread):
+    def __init__(self):
+        self.stdout = None
+        self.stderr = None
+        threading.Thread.__init__(self)
+
+    def run(self):
+        p = subprocess.Popen(
+            f'cd {HERE} && voila "{{filename}}" --no-browser --port={{port}}',
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        self.stdout, self.stderr = p.communicate()
+
+def main():
+    os.chdir(str(HERE))
+
+    # launch server in background
+    server = VoilaServer()
+    server.start()
+
+    # TODO: wait for server to start by examining stdout
+
+    # open UI
+    subprocess.call(UI)
+
+    # When UI stops, kill voila
+    for proc in psutil.process_iter():
+        if 'voila' in proc.name():
+            os.kill(proc.pid, signal.SIGILL)

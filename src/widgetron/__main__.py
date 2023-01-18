@@ -122,30 +122,8 @@ def package_electron_app(kwargs):
 
 
 def create_windows_menu_file(kwargs):
-    name = kwargs["name"]
-    temp_files = kwargs["temp_files"]
-
-    server = temp_files / "server"
-    output = temp_files / "recipe/widgetron_shortcut.json"
-
-    # Locate the executable file for the electron app
-    exe = next(server.rglob("*.exe")).relative_to(server)
-    install_path = Path("lib/site-packages") / exe
-
-    # Create menuinst description of the shortcut
-    data = {
-        "menu_name": name,
-        "menu_items": [
-            {
-                "name": name,
-                "system": "${ROOT_PREFIX}\\" + "\\".join(install_path.parts),
-            }
-        ],
-    }
-
-    # Export it to the recipe dir for the conda package
-    with open(output, "w") as f:
-        json.dump(data, f)
+    if WIN and ("icon" in kwargs):
+        shutil.copy(kwargs["icon"], kwargs["temp_files"] / "recipe/widgetron_icon.ico")
 
 
 def build_conda_package(kwargs):

@@ -123,7 +123,9 @@ def package_electron_app(kwargs):
 
 def create_windows_menu_file(kwargs):
     if WIN and ("icon" in kwargs):
-        shutil.copy(kwargs["icon"], kwargs["temp_files"] / "recipe/widgetron_icon.ico")
+        shutil.copy(
+            kwargs["icon"], kwargs["temp_files"] / "recipe/widgetron_icon.ico"
+        )
 
 
 def build_conda_package(kwargs):
@@ -142,7 +144,8 @@ def cli():
     handle_source_code(kwargs)
     copy_notebook(kwargs)
     package_electron_app(kwargs)
-    if WIN: create_windows_menu_file(kwargs)
+    if WIN:
+        create_windows_menu_file(kwargs)
     build_conda_package(kwargs)
     build_installer(kwargs)
 

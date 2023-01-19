@@ -9,7 +9,7 @@ from subprocess import call
 
 from .jinja_functions import render_templates
 
-WIDGETRON = Path(__file__).parent
+HERE = Path(__file__).parent
 PYTHON = Path(sys.executable)
 CONDA_PREFIX = PYTHON.parent
 WIN = platform.system() == "Windows"
@@ -73,6 +73,9 @@ def parse_arguments():
 
     if kwargs["name"] is None:
         kwargs["name"] = Path(kwargs["file"]).stem.replace(" ", "_")
+    
+    if kwargs["icon"] is None:
+        kwargs["icon"] = str((HERE / "widgetron.ico").absolute())
 
     kwargs["temp_files"] = Path(kwargs["outdir"]) / "widgetron_temp_files"
     kwargs["filename"] = Path(kwargs["file"]).name
@@ -122,7 +125,7 @@ def package_electron_app(kwargs):
 
 
 def create_windows_menu_file(kwargs):
-    if WIN and ("icon" in kwargs):
+    if WIN:
         shutil.copy(
             kwargs["icon"], kwargs["temp_files"] / "recipe/widgetron_icon.ico"
         )
@@ -140,6 +143,7 @@ def build_installer(kwargs):
 
 def cli():
     kwargs = parse_arguments()
+    
     render_templates(**kwargs)
     handle_source_code(kwargs)
     copy_notebook(kwargs)

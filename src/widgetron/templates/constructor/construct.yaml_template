@@ -12,3 +12,4 @@ specs:
   - ipywidgets{% for package in dependencies %}
   - {{package}}{% endfor %}
 register_python_default: false
+icon_image: "../recipe/widgetron_icon.ico"

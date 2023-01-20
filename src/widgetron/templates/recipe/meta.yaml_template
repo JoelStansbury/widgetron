@@ -8,6 +8,8 @@ source:
 build:
   number: 0
   script: python -m pip install .  # [not win]
+  entry_points:
+    - {{name}} = widgetron_app.cli:main
 
 requirements:
   host:

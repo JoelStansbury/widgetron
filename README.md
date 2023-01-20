@@ -15,7 +15,7 @@ At the moment, it only works on Windows, but there are plans to address cross-pl
 
 ## Installation
 ```bash
-mamba install boa constructor nsis nodejs -c conda-forge
+mamba install boa constructor nodejs -c conda-forge
 pip install widgetron
 ```
 

@@ -73,7 +73,7 @@ def parse_arguments():
 
     if kwargs["name"] is None:
         kwargs["name"] = Path(kwargs["file"]).stem.replace(" ", "_")
-    
+
     if kwargs["icon"] is None:
         kwargs["icon"] = str((HERE / "widgetron.ico").absolute())
 
@@ -143,7 +143,7 @@ def build_installer(kwargs):
 
 def cli():
     kwargs = parse_arguments()
-    
+
     render_templates(**kwargs)
     handle_source_code(kwargs)
     copy_notebook(kwargs)

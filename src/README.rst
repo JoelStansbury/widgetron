@@ -1,3 +1,7 @@
+.. figure:: https://user-images.githubusercontent.com/48299585/213842033-c0c19779-84b9-4a07-83a0-9b75ef4b3971.JPG
+   :alt: image
+   :width: 500
+
 This command line utility builds a standalone executable installer for a
 single ipython notebook. It is intended for applications built with
 ipywidgets. (Not yet tested on osx)

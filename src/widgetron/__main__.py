@@ -16,7 +16,7 @@ WIN = platform.system() == "Windows"
 
 INSTALL_ELECTRON = "npm install --save-dev electron"
 INSTALL_ELECTRON_PACKAGER = "npm install --save-dev electron-packager"
-PACKAGE_ELECTRON_APPLICATION = "npx electron-packager . --out=../server/widgetron_app --ignore=node_modules"
+PACKAGE_ELECTRON_APPLICATION = "npx electron-packager . --out=../server/widgetron_app --ignore=node_modules --icon={}".format
 CONDA_BUILD = "conda-mambabuild {} -c conda-forge"
 
 parser = argparse.ArgumentParser(
@@ -105,20 +105,14 @@ def copy_notebook(kwargs):
 
 
 def package_electron_app(kwargs):
+    icon = Path(kwargs["icon"]).absolute()
     cwd = Path().absolute()
-    icon = kwargs["icon"]
-
-    if icon is None:
-        extra = ""
-    else:
-        icon = Path(icon).absolute()
-        extra = f" --icon={icon}"
 
     os.chdir(str(kwargs["temp_files"] / "electron"))
 
     call("npm install .", shell=True)
     call(
-        PACKAGE_ELECTRON_APPLICATION + extra,
+        PACKAGE_ELECTRON_APPLICATION(icon),
         shell=True,
     )
     os.chdir(str(cwd))

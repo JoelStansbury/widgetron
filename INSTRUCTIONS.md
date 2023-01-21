@@ -10,5 +10,8 @@ by running conda init? [yes|no]
 [no] >>> yes
 ```
 
+![image](https://user-images.githubusercontent.com/48299585/213860689-51e4c09c-3755-4fbb-a26e-284d8ea96c9c.png)
+
+
 ## Mac
 TBD

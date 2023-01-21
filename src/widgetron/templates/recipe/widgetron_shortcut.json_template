@@ -3,7 +3,8 @@
     "menu_items": [
         {
             "name": "{{name}}",
-            "script": "${PREFIX}/Scripts/activate.bat && python -m widgetron_app",
+            "system": "cmd.exe",
+            "scriptarguments": ["/c start /min cmd.exe /c \"${PREFIX}/Scripts/activate.bat && my_notebook\""],
             "icon": "${MENU_DIR}/widgetron_icon.ico"
         }
     ]

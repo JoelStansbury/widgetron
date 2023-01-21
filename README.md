@@ -55,14 +55,13 @@ options:
 ```
 
 ## TODO
-- Test on mac and linux
+- Test on mac
    > __constructor__ is not available through conda-forge on __osx-arm64__
 - Clean up metadata propagation.
 - Allow multiple `-src` directories
 - Investigate the possibility to bundle multiple notebooks (I think I saw somewhere that `voila` can host more than one)
 - Upload to conda-forge
-- Better page loading
-  - Sometimes `index.html` is redirected to `localhost:8866` before `voila` finished booting up and the app is unresponsive requiring manual reload of UI.
+
 
 
 ## Example Usage

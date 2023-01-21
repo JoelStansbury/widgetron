@@ -1,8 +1,16 @@
-# widgetron
-App bundler for ipython notebooks.
+<img src="https://user-images.githubusercontent.com/48299585/213842033-c0c19779-84b9-4a07-83a0-9b75ef4b3971.JPG" alt="drawing" width="500"/>
+
 This command line utility builds a standalone executable installer for a single ipython notebook. It is intended for applications built with ipywidgets.
 At the moment, it only works on Windows, but there are plans to address cross-platform support.
 
+## Quickstart
+```bash
+conda install boa constructor nodejs -c conda-forge
+pip install widgetron
+widgetron -h
+```
+
+### How it Works
 1. Builds and packages a minimal electron interface to navigate to `localhost:8866` and boot up the `voila` server
 2. Copies a notebook (specified by `-f`) into a template python package
 3. Copies the entire contents of the built electron application into the template python package.
@@ -13,16 +21,8 @@ At the moment, it only works on Windows, but there are plans to address cross-pl
 5. Builds an installer
    - Conda dependencies are specified with the `-deps` parameter (see example).
 
-## Installation
-```bash
-mamba install boa constructor nodejs -c conda-forge
-pip install widgetron
-```
 
 ## Help
-```bash
-widgetron -h
-```
 ```
 usage: widgetron [-h] [-deps DEPENDENCIES [DEPENDENCIES ...]] [-c CHANNELS [CHANNELS ...]] [-p PORT] [-n NAME] [-o OUTDIR] [-v VERSION]
                  [-src PYTHON_SOURCE_DIR] [-icon ICON]

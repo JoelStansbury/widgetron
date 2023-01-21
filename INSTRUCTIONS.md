@@ -16,4 +16,4 @@ by running conda init? [yes|no]
 
 
 ## Mac
-TBD
+TBD... Hopefully the same as Linux

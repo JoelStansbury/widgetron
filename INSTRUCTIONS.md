@@ -1,6 +1,8 @@
 ## Windows
 Double click on the executable and click next until it stops.
 
+![image](https://user-images.githubusercontent.com/48299585/211173763-fc7b54ad-c8cf-4386-94d8-cfc90cdb77d8.png)
+
 ## Linux
 ```
 > bash <FILENAME>.sh

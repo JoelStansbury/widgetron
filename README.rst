@@ -4,7 +4,10 @@
 
 This command line utility builds a standalone executable installer for a
 single ipython notebook. It is intended for applications built with
-ipywidgets. (Not yet tested on osx)
+ipywidgets.
+
+- Not tested on osx
+- Interactive shell installers are currently broken (as of construcor 3.4.2), they're working on it
 
 Quickstart
 ----------

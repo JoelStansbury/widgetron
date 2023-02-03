@@ -1,10 +1,6 @@
 {
   "name": "{{name}}",
-  "version": "{{version}}",
-  "description": "{{description}}",
   "main": "main.js",
-  "author": "{{author}}",
-  "license": "{{license}}",
   "scripts": {
     "start": "electron ."
   },

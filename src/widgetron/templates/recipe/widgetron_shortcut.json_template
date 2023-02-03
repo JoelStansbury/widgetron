@@ -4,8 +4,8 @@
         {
             "name": "{{name}}",
             "system": "cmd.exe",
-            "scriptarguments": ["/c start /min cmd.exe /c \"${PREFIX}/Scripts/activate.bat && {{name}}\""],
-            "icon": "${MENU_DIR}/widgetron_icon.ico"
+            "scriptarguments": ["/c start /min cmd.exe /c \"${PREFIX}/Scripts/activate.bat && {{name_nospace}}\""],
+            "icon": "${MENU_DIR}/{{icon_name}}"
         }
     ]
 }

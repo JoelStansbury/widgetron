@@ -1,4 +1,4 @@
-name: {{name}}
+name: {{name_nospace}}
 version: {{version}}
 channels:
   - local{% for c in channels %}
@@ -8,8 +8,7 @@ specs:
   - python
   - widgetron_app
   - menuinst >=1.4.17  # [win]
-  - voila
-  - ipywidgets{% for package in dependencies %}
+  - voila{% for package in dependencies %}
   - {{package}}{% endfor %}
 register_python_default: false
-icon_image: "../recipe/widgetron_icon.ico"
+icon_image: "../recipe/{{icon_name}}"

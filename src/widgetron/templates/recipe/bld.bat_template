@@ -2,4 +2,4 @@ call python -m pip install .
 set MENU_DIR="%PREFIX%\Menu"
 if not exist %MENU_DIR% mkdir %MENU_DIR%
 copy "%RECIPE_DIR%\widgetron_shortcut.json" %MENU_DIR%
-copy "%RECIPE_DIR%\widgetron_icon.ico" %MENU_DIR%
+copy "%RECIPE_DIR%\{{icon_name}}" %MENU_DIR%

@@ -1,23 +1,35 @@
 import argparse
-import json
 import os
 import platform
 import shutil
 import sys
 from pathlib import Path
 from subprocess import call
+import re
 
 from .jinja_functions import render_templates
 
 HERE = Path(__file__).parent
 PYTHON = Path(sys.executable)
 CONDA_PREFIX = PYTHON.parent
+
 WIN = platform.system() == "Windows"
+LINUX = platform.system() == "Linux"
+OSX = platform.system() == "Darwin"
 
 INSTALL_ELECTRON = "npm install --save-dev electron"
 INSTALL_ELECTRON_PACKAGER = "npm install --save-dev electron-packager"
-PACKAGE_ELECTRON_APPLICATION = "npx electron-packager . --out=../server/widgetron_app --ignore=node_modules"
+PACKAGE_ELECTRON_APPLICATION = "npx electron-packager . --out=../server/widgetron_app --ignore=node_modules --icon=\"{}\"".format
 CONDA_BUILD = "conda-mambabuild {} -c conda-forge"
+
+if WIN:
+    DEFAULT_ICON = HERE / "icons/widgetron.ico"
+elif LINUX:
+    DEFAULT_ICON = HERE / "icons/widgetron.png"
+elif OSX:
+    DEFAULT_ICON = HERE / "icons/widgetron.icns"
+else:
+    raise OSError(f"Unknown platform {platform.system()}")
 
 parser = argparse.ArgumentParser(
     prog="widgetron",
@@ -56,7 +68,7 @@ arguments = [
     [["-o", "--outdir"], dict(default="."), "App version number."],
     [["-v", "--version"], dict(default=1), ""],
     [["-src", "--python_source_dir"], {}, src_desc],
-    [["-icon", "--icon"], {}, "Icon for app. Must be a .ico file"],
+    [["-icon", "--icon"], dict(default=DEFAULT_ICON), "Icon for app. (windows->.ico, linux->.png/.svg, osx->.icns)"],
 ]
 
 for flags, kwargs, desc in arguments:
@@ -67,23 +79,20 @@ for flags, kwargs, desc in arguments:
 def parse_arguments():
     kwargs = parser.parse_args().__dict__
 
-    if not kwargs["file"].endswith(".ipynb"):
-        print("ERROR: file must have (.ipynb) extension.")
-        return
-
     if kwargs["name"] is None:
-        kwargs["name"] = Path(kwargs["file"]).stem.replace(" ", "_")
+        kwargs["name"] = Path(kwargs["file"]).stem
 
-    if kwargs["icon"] is None:
-        kwargs["icon"] = str((HERE / "widgetron.ico").absolute())
+    pat = re.compile(r"[^a-zA-Z0-9]")
+    kwargs["name_nospace"] = pat.sub("_", kwargs["name"])
 
+    kwargs["icon_name"] = Path(kwargs["icon"]).name
     kwargs["temp_files"] = Path(kwargs["outdir"]) / "widgetron_temp_files"
     kwargs["filename"] = Path(kwargs["file"]).name
     return kwargs
 
 
-def handle_source_code(kwargs):
-    # Copy python source into template
+def copy_source_code(kwargs):
+    # Copy python source into template package
     if kwargs["python_source_dir"]:
         if Path(kwargs["python_source_dir"]).is_dir():
             shutil.copytree(
@@ -101,34 +110,40 @@ def handle_source_code(kwargs):
 
 def copy_notebook(kwargs):
     # Copy notebook into template
-    shutil.copy(kwargs["file"], kwargs["temp_files"] / "server/widgetron_app")
+    # Check filetype
+    nb = Path(kwargs["file"])
+    if nb.is_file():
+        assert nb.suffix.lower() == ".ipynb", f"{nb} is not a notebook"
+        shutil.copy(nb, kwargs["temp_files"] / "server/widgetron_app")
+    else:
+        assert list(nb.glob("*.ipynb")), f"No notebooks found in {nb}"
+        assert not kwargs["python_source_dir"], "-src may only be provided if -f is a single .ipynb file"
+        shutil.copytree(
+            nb,
+            kwargs["temp_files"] / f"server/widgetron_app/{nb.stem}"
+        )
 
 
 def package_electron_app(kwargs):
+    icon = Path(kwargs["icon"]).absolute()
     cwd = Path().absolute()
-    icon = kwargs["icon"]
-
-    if icon is None:
-        extra = ""
-    else:
-        icon = Path(icon).absolute()
-        extra = f" --icon={icon}"
 
     os.chdir(str(kwargs["temp_files"] / "electron"))
 
     call("npm install .", shell=True)
     call(
-        PACKAGE_ELECTRON_APPLICATION + extra,
+        PACKAGE_ELECTRON_APPLICATION(icon),
         shell=True,
     )
     os.chdir(str(cwd))
 
 
-def create_windows_menu_file(kwargs):
-    if WIN:
-        shutil.copy(
-            kwargs["icon"], kwargs["temp_files"] / "recipe/widgetron_icon.ico"
-        )
+def copy_icon(kwargs):
+    icon = Path(kwargs["icon"])
+    shutil.copy(
+        str(icon), kwargs["temp_files"] / f"recipe/{icon.name}"
+    )
+    kwargs["icon"] = icon.name
 
 
 def build_conda_package(kwargs):
@@ -145,11 +160,12 @@ def cli():
     kwargs = parse_arguments()
 
     render_templates(**kwargs)
-    handle_source_code(kwargs)
-    copy_notebook(kwargs)
     package_electron_app(kwargs)
-    if WIN:
-        create_windows_menu_file(kwargs)
+
+    copy_source_code(kwargs)
+    copy_notebook(kwargs)
+    copy_icon(kwargs)
+
     build_conda_package(kwargs)
     build_installer(kwargs)
 

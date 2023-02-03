@@ -7,7 +7,6 @@ single ipython notebook. It is intended for applications built with
 ipywidgets.
 
 - Not tested on osx
-- Interactive shell installers are currently broken (as of construcor 3.4.2), they're working on it
 
 Quickstart
 ----------

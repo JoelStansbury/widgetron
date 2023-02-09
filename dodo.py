@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 # Location of environment file
-ENV_FILE = "environment.yaml"
+ENV_FILE = "environment.yml"
 
 # Path to environment
 ENV_PATH = "./.venv"
@@ -63,6 +63,9 @@ def task_install_src():
 
 def task_lab():
     return _do(f"{CONDA.activate} && jupyter lab")
+
+def task_lint():
+    return _do(CLEAN)
 
 def task_publish():
     return _do(CLEAN, PyPi.distribute)

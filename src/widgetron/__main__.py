@@ -1,11 +1,12 @@
 import argparse
 import os
 import platform
+import re
 import shutil
 import sys
+import zipfile
 from pathlib import Path
 from subprocess import call
-import re
 
 from .jinja_functions import render_templates
 
@@ -19,7 +20,7 @@ OSX = platform.system() == "Darwin"
 
 INSTALL_ELECTRON = "npm install --save-dev electron"
 INSTALL_ELECTRON_PACKAGER = "npm install --save-dev electron-packager"
-PACKAGE_ELECTRON_APPLICATION = "npx electron-packager . --out=../server/widgetron_app --ignore=node_modules --icon=\"{}\"".format
+PACKAGE_ELECTRON_APPLICATION = 'npx electron-packager . --out=../ --ignore=node_modules --icon="{}"'.format
 CONDA_BUILD = "conda-mambabuild {} -c conda-forge"
 
 if WIN:
@@ -68,12 +69,28 @@ arguments = [
     [["-o", "--outdir"], dict(default="."), "App version number."],
     [["-v", "--version"], dict(default=1), ""],
     [["-src", "--python_source_dir"], {}, src_desc],
-    [["-icon", "--icon"], dict(default=DEFAULT_ICON), "Icon for app. (windows->.ico, linux->.png/.svg, osx->.icns)"],
+    [
+        ["-icon", "--icon"],
+        dict(default=DEFAULT_ICON),
+        "Icon for app. (windows->.ico, linux->.png/.svg, osx->.icns)",
+    ],
 ]
 
 for flags, kwargs, desc in arguments:
     kwargs["help"] = desc
     parser.add_argument(*flags, **kwargs)
+
+
+def zipdir(path, ziph):
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(
+                os.path.join(root, file),
+                os.path.relpath(
+                    os.path.join(root, file), os.path.join(path, "..")
+                ),
+            )
 
 
 def parse_arguments():
@@ -117,16 +134,18 @@ def copy_notebook(kwargs):
         shutil.copy(nb, kwargs["temp_files"] / "server/widgetron_app")
     else:
         assert list(nb.glob("*.ipynb")), f"No notebooks found in {nb}"
-        assert not kwargs["python_source_dir"], "-src may only be provided if -f is a single .ipynb file"
+        assert not kwargs[
+            "python_source_dir"
+        ], "-src may only be provided if -f is a single .ipynb file"
         shutil.copytree(
-            nb,
-            kwargs["temp_files"] / f"server/widgetron_app/{nb.stem}"
+            nb, kwargs["temp_files"] / f"server/widgetron_app/{nb.stem}"
         )
 
 
 def package_electron_app(kwargs):
     icon = Path(kwargs["icon"]).absolute()
     cwd = Path().absolute()
+    _folders = set([x.name for x in Path(kwargs["temp_files"]).glob("*")])
 
     os.chdir(str(kwargs["temp_files"] / "electron"))
 
@@ -136,13 +155,21 @@ def package_electron_app(kwargs):
         shell=True,
     )
     os.chdir(str(cwd))
+    os.chdir(str(kwargs["temp_files"]))
+    dir_name = list(set([x.name for x in Path(".").glob("*")]) - _folders)[0]
+
+    print(dir_name)
+    import shutil
+
+    shutil.make_archive(
+        f"server/widgetron_app/{dir_name}", "zip", str(dir_name)
+    )
+    os.chdir(str(cwd))
 
 
 def copy_icon(kwargs):
     icon = Path(kwargs["icon"])
-    shutil.copy(
-        str(icon), kwargs["temp_files"] / f"recipe/{icon.name}"
-    )
+    shutil.copy(str(icon), kwargs["temp_files"] / f"recipe/{icon.name}")
     kwargs["icon"] = icon.name
 
 

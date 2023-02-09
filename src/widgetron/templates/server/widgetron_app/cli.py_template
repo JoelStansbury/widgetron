@@ -3,10 +3,17 @@ from pathlib import Path
 import platform
 import os, signal
 import psutil
+from zipfile import ZipFile
 
 HERE = Path(__file__).parent
+os.chdir(str(HERE))
 
 SYS = platform.uname().system
+
+for z in HERE.glob("*.zip"):
+    ZipFile(z.name).extractall(z.stem)
+    z.unlink()
+
 if SYS == "Windows":
     UI = str(next(HERE.rglob("*.exe")).absolute())
 elif SYS == "Linux":
@@ -15,8 +22,6 @@ else:
     UI = [str(next(HERE.rglob("{{name}}"))), "--no-sandbox"]
 
 def main():
-    os.chdir(str(HERE))
-
     # launch server in background
     server = subprocess.Popen(
         ['voila', "{{filename}}", '--no-browser', '--port={{port}}'],

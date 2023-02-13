@@ -1,8 +1,7 @@
 import subprocess
 from pathlib import Path
 import platform
-import os, signal
-import psutil
+import os
 import re
 
 HERE = Path(__file__).parent

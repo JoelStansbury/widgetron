@@ -62,7 +62,7 @@ Help
    -c CHANNELS [CHANNELS ...], --channels CHANNELS [CHANNELS ...]
                            List of conda channels required to find specified packages. Order is obeyed, 'local' is always
                            checked first. Default= ['conda-forge',]
-   -p PORT, --port PORT  4-digit port number on which the notebook will be hosted.
+   -p PORT, --port PORT  4-digit port number on which the notebook will be hosted (if the port is in use, voila will scan for a free port).
    -n NAME, --name NAME  Name of the application (defaults to the notebook name).
    -o OUTDIR, --outdir OUTDIR
                            App version number.

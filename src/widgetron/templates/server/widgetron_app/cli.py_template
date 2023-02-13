@@ -1,8 +1,8 @@
 import subprocess
 from pathlib import Path
 import platform
-import os, signal
-import psutil
+import os
+import re
 
 HERE = Path(__file__).parent
 
@@ -25,17 +25,16 @@ def main():
         stderr=subprocess.PIPE
     )
 
-    # wait for server to start
+    # Wait for server to start
     l = str(server.stderr.readline())
     while "http" not in l:
         print(l)
         l = str(server.stderr.readline())
-        if "is already in use," in l:
-            # TODO: instead of killing, maybe check which port it used and tell the UI
-            for proc in psutil.process_iter():
-                if 'voila' in proc.name():
-                    os.kill(proc.pid, signal.SIGILL)
-            return main()
+
+    # Read the output from voila and parse out the url
+    url = re.findall("http://localhost:\d\d\d\d", l)[0]
+    print(url)
+    os.environ["widgetron_voila_url"] = url
 
     # open UI
     subprocess.call(UI)

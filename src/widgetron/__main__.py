@@ -1,11 +1,11 @@
 import argparse
 import os
 import platform
+import re
 import shutil
 import sys
 from pathlib import Path
 from subprocess import call
-import re
 
 from .jinja_functions import render_templates
 
@@ -19,7 +19,7 @@ OSX = platform.system() == "Darwin"
 
 INSTALL_ELECTRON = "npm install --save-dev electron"
 INSTALL_ELECTRON_PACKAGER = "npm install --save-dev electron-packager"
-PACKAGE_ELECTRON_APPLICATION = "npx electron-packager . --out=../server/widgetron_app --ignore=node_modules --icon=\"{}\"".format
+PACKAGE_ELECTRON_APPLICATION = 'npx electron-packager . --out=../server/widgetron_app --ignore=node_modules --icon="{}"'.format
 CONDA_BUILD = "conda-mambabuild {} -c conda-forge"
 
 if WIN:
@@ -68,7 +68,11 @@ arguments = [
     [["-o", "--outdir"], dict(default="."), "App version number."],
     [["-v", "--version"], dict(default=1), ""],
     [["-src", "--python_source_dir"], {}, src_desc],
-    [["-icon", "--icon"], dict(default=DEFAULT_ICON), "Icon for app. (windows->.ico, linux->.png/.svg, osx->.icns)"],
+    [
+        ["-icon", "--icon"],
+        dict(default=DEFAULT_ICON),
+        "Icon for app. (windows->.ico, linux->.png/.svg, osx->.icns)",
+    ],
 ]
 
 for flags, kwargs, desc in arguments:
@@ -117,10 +121,11 @@ def copy_notebook(kwargs):
         shutil.copy(nb, kwargs["temp_files"] / "server/widgetron_app")
     else:
         assert list(nb.glob("*.ipynb")), f"No notebooks found in {nb}"
-        assert not kwargs["python_source_dir"], "-src may only be provided if -f is a single .ipynb file"
+        assert not kwargs[
+            "python_source_dir"
+        ], "-src may only be provided if -f is a single .ipynb file"
         shutil.copytree(
-            nb,
-            kwargs["temp_files"] / f"server/widgetron_app/{nb.stem}"
+            nb, kwargs["temp_files"] / f"server/widgetron_app/{nb.stem}"
         )
 
 
@@ -140,9 +145,7 @@ def package_electron_app(kwargs):
 
 def copy_icon(kwargs):
     icon = Path(kwargs["icon"])
-    shutil.copy(
-        str(icon), kwargs["temp_files"] / f"recipe/{icon.name}"
-    )
+    shutil.copy(str(icon), kwargs["temp_files"] / f"recipe/{icon.name}")
     kwargs["icon"] = icon.name
 
 

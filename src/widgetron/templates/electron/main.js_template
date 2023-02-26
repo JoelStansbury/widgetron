@@ -1,6 +1,6 @@
 const { app, BrowserWindow } = require('electron')
 
-url = process.env.widgetron_voila_url;
+url = process.env.widgetron_url;
 
 const createWindow = () => {
   const win = new BrowserWindow({

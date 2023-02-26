@@ -8,7 +8,6 @@ dependencies:
   - python
   - constructor
   - boa
-  - voila
   - nodejs
   - jupyterlab
   - black

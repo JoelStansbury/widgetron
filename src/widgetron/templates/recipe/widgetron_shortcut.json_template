@@ -3,8 +3,10 @@
     "menu_items": [
         {
             "name": "{{name}}",
-            "system": "cmd.exe",
-            "scriptarguments": ["/c start /min cmd.exe /c \"${PREFIX}/Scripts/activate.bat && {{name_nospace}}\""],
+            "system": "cmd.exe /c powershell -WindowStyle Hidden -Command",
+            "scriptarguments": [
+                "cmd.exe /c '${PREFIX}/Scripts/activate.bat && pythonw -m widgetron_app'"
+            ],
             "icon": "${MENU_DIR}/{{icon_name}}"
         }
     ]

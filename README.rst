@@ -21,7 +21,7 @@ How it Works
 ~~~~~~~~~~~~
 
 1. Builds and packages a minimal electron interface to navigate to
-   ``localhost:8866`` and boot up the ``voila`` server
+   ``localhost:8866`` and boot up the ``jupyter lab`` server
 2. Copies a notebook (specified by ``-f``) into a template python
    package
 3. Copies the entire contents of the built electron application into the
@@ -46,7 +46,7 @@ Help
 
 ::
 
-   usage: widgetron [-h] [-deps DEPENDENCIES [DEPENDENCIES ...]] [-c CHANNELS [CHANNELS ...]] [-p PORT] [-n NAME] [-o OUTDIR] [-v VERSION]
+   usage: widgetron [-h] [-deps DEPENDENCIES [DEPENDENCIES ...]] [-c CHANNELS [CHANNELS ...]] [-n NAME] [-o OUTDIR] [-v VERSION]
                     [-src PYTHON_SOURCE_DIR] [-icon ICON]
                     file
 
@@ -61,8 +61,6 @@ Help
                            List of conda-forge packages required to run the widget (pip packages are not supported).
    -c CHANNELS [CHANNELS ...], --channels CHANNELS [CHANNELS ...]
                            List of conda channels required to find specified packages. Order is obeyed, 'local' is always
-                           checked first. Default= ['conda-forge',]
-   -p PORT, --port PORT  4-digit port number on which the notebook will be hosted (if the port is in use, voila will scan for a free port).
    -n NAME, --name NAME  Name of the application (defaults to the notebook name).
    -o OUTDIR, --outdir OUTDIR
                            App version number.

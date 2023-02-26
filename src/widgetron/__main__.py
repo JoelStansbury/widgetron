@@ -56,11 +56,6 @@ arguments = [
         "List of conda channels required to find specified packages. Order is obeyed, 'local' is always checked first. Default= ['conda-forge',]",
     ],
     [
-        ["-p", "--port"],
-        dict(default="8866"),
-        "4-digit port number on which the notebook will be hosted.",
-    ],
-    [
         ["-n", "--name"],
         {},
         "Name of the application (defaults to the notebook name).",

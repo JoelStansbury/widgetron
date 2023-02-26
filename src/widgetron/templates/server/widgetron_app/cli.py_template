@@ -19,25 +19,25 @@ def main():
 
     # launch server in background
     server = subprocess.Popen(
-        ['voila', "{{filename}}", '--no-browser', '--port={{port}}'],
-        shell=False,
+        ['jupyter', 'lab', "{{filename}}", '--no-browser'],
+        shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
 
     # Wait for server to start
     l = str(server.stderr.readline())
-    while "http" not in l:
+    while "http://localhost:" not in l:
         print(l)
         l = str(server.stderr.readline())
 
-    # Read the output from voila and parse out the url
-    url = re.findall("http://localhost:\d\d\d\d", l)[0]
+    # Read the output from jupyter lab and parse out the url
+    url = re.findall("http://localhost:[a-z0-9:?/=]*", l)[0].strip()
     print(url)
-    os.environ["widgetron_voila_url"] = url
+    os.environ["widgetron_url"] = url
 
     # open UI
     subprocess.call(UI)
 
-    # when UI stops, kill voila
+    # when UI stops, kill jupyter lab
     server.kill()

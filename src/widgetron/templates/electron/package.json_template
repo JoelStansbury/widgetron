@@ -1,13 +1,22 @@
 {
-  "name": "{{name}}",
+  "name": "widgetron",
   "main": "main.js",
+  "version": "0.1.0",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder build"
   },
-  "dependencies": {
+  "build": {
+    "appId": "com.example.app",
+    "win": {
+      "icon": "build/icon.ico"
+    }
   },
   "devDependencies": {
-    "electron-packager": "^17.1.1",
-    "electron": "^22.0.0"
+    "electron": "^22.3.1",
+    "electron-builder": "^23.6.0"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
   }
 }

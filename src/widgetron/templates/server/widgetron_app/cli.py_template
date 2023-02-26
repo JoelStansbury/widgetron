@@ -4,19 +4,24 @@ import platform
 import os
 import re
 import psutil
+from zipfile import ZipFile
 
 HERE = Path(__file__).parent
+os.chdir(str(HERE))
+for z in HERE.glob("*.zip"):
+    ZipFile(z.name).extractall(z.stem)
+    z.unlink()
 
 SYS = platform.uname().system
 if SYS == "Windows":
-    UI = str(next(HERE.rglob("*.exe")).absolute())
+    UI = str(next(HERE.rglob("widgetron.exe")).absolute())
 elif SYS == "Linux":
-    UI = [str(next(HERE.rglob("{{name}}"))), "--no-sandbox"]
+    UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
 else:
-    UI = [str(next(HERE.rglob("{{name}}"))), "--no-sandbox"]
+    UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
 
 def main():
-    os.chdir(str(HERE))
+    os.chdir("data")
 
     # launch server in background
     server = subprocess.Popen(

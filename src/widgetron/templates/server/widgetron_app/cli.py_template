@@ -3,6 +3,7 @@ from pathlib import Path
 import platform
 import os
 import re
+import psutil
 
 HERE = Path(__file__).parent
 
@@ -19,7 +20,7 @@ def main():
 
     # launch server in background
     server = subprocess.Popen(
-        ['jupyter', 'lab', "{{filename}}", '--no-browser'],
+        ['jupyter', 'lab', '--no-browser'],
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
@@ -33,6 +34,10 @@ def main():
 
     # Read the output from jupyter lab and parse out the url
     url = re.findall("http://localhost:[a-z0-9:?/=]*", l)[0].strip()
+    token = url.split("token=")[1]
+    port = url.split("localhost:")[1].split("/lab")[0]
+    fname = "my_notebook.ipynb"
+    url = f"http://localhost:{port}/lab/tree/{fname}?token={token}"
     print(url)
     os.environ["widgetron_url"] = url
 
@@ -40,4 +45,9 @@ def main():
     subprocess.call(UI)
 
     # when UI stops, kill jupyter lab
-    server.kill()
+    def kill(proc_pid):
+        process = psutil.Process(proc_pid)
+        for proc in process.children(recursive=True):
+            proc.kill()
+        process.kill()
+    kill(server.pid)

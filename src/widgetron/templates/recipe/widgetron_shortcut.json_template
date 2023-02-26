@@ -5,7 +5,7 @@
             "name": "{{name}}",
             "system": "cmd.exe /c powershell -WindowStyle Hidden -Command",
             "scriptarguments": [
-                "cmd.exe /c '${PREFIX}/Scripts/activate.bat && pythonw -m widgetron_app'"
+                "cmd.exe /c '${PREFIX}/Scripts/activate.bat && {{ name_nospace }}'"
             ],
             "icon": "${MENU_DIR}/{{icon_name}}"
         }

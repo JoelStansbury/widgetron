@@ -6,7 +6,7 @@ channels:
 
 dependencies:
   - python
-  - constructor
+  - constructor<3.4
   - boa
   - nodejs
   - jupyterlab

@@ -41,7 +41,7 @@ def main():
     url = re.findall("http://localhost:[a-z0-9:?/=]*", l)[0].strip()
     token = url.split("token=")[1]
     port = url.split("localhost:")[1].split("/lab")[0]
-    fname = "my_notebook.ipynb"
+    fname = {{ filename }}
     url = f"http://localhost:{port}/lab/tree/{fname}?token={token}"
     print(url)
     os.environ["widgetron_url"] = url

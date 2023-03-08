@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 # Location of environment file
-ENV_FILE = "environment.yaml"
+ENV_FILE = "environment.yml"
 
 # Path to environment
 ENV_PATH = "./.venv"

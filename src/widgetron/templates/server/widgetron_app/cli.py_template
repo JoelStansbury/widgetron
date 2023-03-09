@@ -21,11 +21,11 @@ else:
     UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
 
 def main():
-    os.chdir("data")
+    os.chdir("notebooks")
 
     # launch server in background
     server = subprocess.Popen(
-        ['jupyter', 'lab', '--no-browser'],
+        [{% for part in server_command %}'{{part}}',{% endfor %}],
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE

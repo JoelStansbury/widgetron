@@ -22,51 +22,36 @@ jobs:
         #   path: ~\AppData\Local\pip\Cache
 
     steps:
-    
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Setup Mambaforge
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        miniforge-variant: Mambaforge
-        miniforge-version: latest
-        activate-environment: dev
-        use-mamba: true
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          environment-file: environment.yml
+          use-mamba: true
 
-    - name: Set cache date
-      run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+      - run: conda list
 
-    - uses: actions/cache@v3
-      with:
-        path: ${{ matrix.path }}
-        key: ${{ matrix.label }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
-      id: cache
+      - name: Test
+        run: |
+          mkdir dist
+          python -m pip install . --no-build-isolation
+          widgetron -h
+          widgetron -dir=examples/minesweeper -o=dist
 
-    - name: Update Environment
-      run: mamba env update -n dev -f environment.yml
-      if: steps.cache.outputs.cache-hit != 'true'
+      - name: Package
+        run: |
+          set -eux
 
-    - name: Conda List
-      run: conda list
-
-    - name: Test
-      run: |
-        mkdir dist
-        python -m pip install . --no-build-isolation
-        widgetron -h
-        widgetron -dir=examples/minesweeper -o=dist
-
-    - name: Package
-      run: |
-        set -eux
-
-        pip install build
-        python -m build
-      
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: extension-artifacts
-        path: dist/*
-        if-no-files-found: error
+          pip install build
+          python -m build
+        
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: extension-artifacts
+          path: dist/*
+          if-no-files-found: error

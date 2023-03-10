@@ -17,13 +17,9 @@ def zipdir(path, ziph):
     for root, dirs, files in os.walk(path):
         for file in files:
             ziph.write(
-                os.path.join(root, file), 
-                os.path.relpath(
-                    os.path.join(root, file), 
-                    os.path.join(path, '..')
-                )
+                os.path.join(root, file),
+                os.path.relpath(os.path.join(root, file), os.path.join(path, "..")),
             )
-
 
 
 from .jinja_functions import render_templates
@@ -52,7 +48,7 @@ else:
 def parse_arguments():
     kwargs = CONFIG
     if "environment_yaml" in kwargs:
-        with open(kwargs["environment_yaml"],"r") as f:
+        with open(kwargs["environment_yaml"], "r") as f:
             _env = yaml.safe_load(f)
         print(f"Searching for dependencies in {kwargs['environment_yaml']}")
         kwargs["dependencies"] = kwargs.get("dependencies", _env["dependencies"])
@@ -62,12 +58,9 @@ def parse_arguments():
         assert kwargs["dependencies"] is not None
         assert kwargs["channels"] is not None
 
-
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
     assert isinstance(kwargs["server_command"], list)
     assert "version" in kwargs
-
-    
 
     kwargs["icon"] = kwargs.get("icon", DEFAULT_ICON)
 
@@ -112,9 +105,7 @@ def copy_notebook(kwargs):
         shutil.copy(nb, dest)
     else:
         assert list(nb.glob("*.ipynb")), f"No notebooks found in {nb}"
-        shutil.copytree(
-            nb, dest/nb.stem
-        )
+        shutil.copytree(nb, dest / nb.stem)
 
 
 def package_electron_app(kwargs):
@@ -127,15 +118,18 @@ def package_electron_app(kwargs):
     shutil.copy(str(icon), f"build/icon{icon.suffix}")
 
     call("npm install .", shell=True)
-    call("npm run build", shell=True,)
+    call(
+        "npm run build",
+        shell=True,
+    )
 
     dist = list(Path("dist").glob("*-unpacked"))[0]
     os.chdir(dist)
 
-
-    with zipfile.ZipFile('../../../server/widgetron_app/ui.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
-        zipdir('.', zipf)
-
+    with zipfile.ZipFile(
+        "../../../server/widgetron_app/ui.zip", "w", zipfile.ZIP_DEFLATED
+    ) as zipf:
+        zipdir(".", zipf)
 
     os.chdir(str(cwd))
 

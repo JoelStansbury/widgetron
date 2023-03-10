@@ -15,6 +15,17 @@ jobs:
         os: ["ubuntu-latest", "windows-latest"]
 
     steps:
+
+    - name: Set cache date
+      run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+    - uses: actions/cache@v2
+      with:
+        path: ${{ matrix.prefix }}
+        key: ${{ matrix.label }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+      id: cache
+
+    
     - name: Checkout
       uses: actions/checkout@v3
 
@@ -30,7 +41,7 @@ jobs:
         mkdir dist
         python -m pip install . --no-build-isolation
         widgetron -h
-        widgetron examples/minesweeper -o dist
+        widgetron -dir=examples/minesweeper -o=dist
 
     - name: Package
       run: |

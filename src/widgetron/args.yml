@@ -38,6 +38,11 @@ channels:
         Order is obeyed, 'local' is always checked first. Default=['conda-forge',].
         Deduced from environment_yaml if None.
 
+explicit_lock:
+    flag: "-lock"
+    help: |
+        Path to lock file generated via `conda-lock --kind=explicit`.
+
 python_source_dir:
     flag: "-src"
     help: |

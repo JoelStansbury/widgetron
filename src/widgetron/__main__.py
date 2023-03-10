@@ -47,7 +47,15 @@ else:
 
 def parse_arguments():
     kwargs = CONFIG
-    if "environment_yaml" in kwargs:
+    if "explicit_lock" in kwargs:
+        kwargs["channels"] = []
+        kwargs["dependencies"] = []
+        with open(kwargs["explicit_lock"], "r") as f:
+            l = f.readline()
+            while "@EXPLICIT" not in l:
+                l = f.readline()
+            kwargs["dependencies"] = [s.strip() for s in f.readlines()]
+    elif "environment_yaml" in kwargs:
         with open(kwargs["environment_yaml"], "r") as f:
             _env = yaml.safe_load(f)
         print(f"Searching for dependencies in {kwargs['environment_yaml']}")
@@ -81,15 +89,15 @@ def copy_source_code(kwargs):
     dest = kwargs["temp_files"] / "server/widgetron_app/notebooks"
     dest.mkdir()
 
-    if "python_source_dir" in kwargs:
-        if Path(kwargs["python_source_dir"]).is_dir():
+    if "python_source" in kwargs:
+        if Path(kwargs["python_source"]).is_dir():
             shutil.copytree(
-                kwargs["python_source_dir"],
-                dest / Path(kwargs["python_source_dir"]).stem,
+                kwargs["python_source"],
+                dest / Path(kwargs["python_source"]).stem,
             )
-        elif Path(kwargs["python_source_dir"]).is_file():
+        elif Path(kwargs["python_source"]).is_file():
             shutil.copy(
-                kwargs["python_source_dir"],
+                kwargs["python_source"],
                 dest,
             )
 

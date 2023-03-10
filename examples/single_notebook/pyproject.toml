@@ -1,0 +1,5 @@
+
+[tool.widgetron]
+notebook = "my_notebook.ipynb"
+version = "0.1.0"
+python_source = "my_package"

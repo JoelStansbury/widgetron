@@ -38,7 +38,12 @@ channels:
         Order is obeyed, 'local' is always checked first. Default=['conda-forge',].
         Deduced from environment_yaml if None.
 
-python_source_dir:
+explicit_lock:
+    flag: "-lock"
+    help: |
+        Path to lock file generated via `conda-lock --kind=explicit`.
+
+python_source:
     flag: "-src"
     help: |
         This is a shortcut to avoid needing to build a conda package for your source code.

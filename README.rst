@@ -87,6 +87,8 @@ Help
                            C:/path/to/my_package, and the directory will by
                            copied recursively into a package shell immediately
                            next to the notebook.
+   -lock EXPLICIT_LOCK, --explicit_lock EXPLICIT_LOCK
+                           Path to lock file generated via `conda-lock --kind=explicit`.
    -sc SERVER_COMMAND [SERVER_COMMAND ...], --server_command SERVER_COMMAND [SERVER_COMMAND ...]
                            How to launch JupyterLab. Default `["jupyter", "lab",
                            "--no-browser"]`

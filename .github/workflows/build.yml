@@ -13,6 +13,13 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest"]
+        include:
+        - os: ubuntu-latest
+          path: ~/.cache/pip
+        # - os: macos-latest
+        #   path: ~/Library/Caches/pip
+        # - os: windows-latest
+        #   path: ~\AppData\Local\pip\Cache
 
     steps:
     
@@ -32,7 +39,7 @@ jobs:
 
     - uses: actions/cache@v3
       with:
-        path: ${{ matrix.prefix }}
+        path: ${{ matrix.path }}
         key: ${{ matrix.label }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
       id: cache
 

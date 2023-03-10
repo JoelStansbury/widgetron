@@ -1,0 +1,10 @@
+name: dev
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python
+  - jupyterlab
+  - ipyevents
+  - ipywidgets

@@ -1,11 +1,26 @@
-import argparse
 import os
 import platform
 import re
 import shutil
 import sys
+import zipfile
 from pathlib import Path
 from subprocess import call
+
+import yaml
+
+from .parse_args import CONFIG
+
+
+def zipdir(path, ziph):
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(
+                os.path.join(root, file),
+                os.path.relpath(os.path.join(root, file), os.path.join(path, "..")),
+            )
+
 
 from .jinja_functions import render_templates
 
@@ -17,10 +32,8 @@ WIN = platform.system() == "Windows"
 LINUX = platform.system() == "Linux"
 OSX = platform.system() == "Darwin"
 
-INSTALL_ELECTRON = "npm install --save-dev electron"
-INSTALL_ELECTRON_PACKAGER = "npm install --save-dev electron-packager"
-PACKAGE_ELECTRON_APPLICATION = 'npx electron-packager . --out=../server/widgetron_app --ignore=node_modules --icon="{}"'.format
 CONDA_BUILD = "conda-mambabuild {} -c conda-forge"
+DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
 
 if WIN:
     DEFAULT_ICON = HERE / "icons/widgetron.ico"
@@ -31,102 +44,68 @@ elif OSX:
 else:
     raise OSError(f"Unknown platform {platform.system()}")
 
-parser = argparse.ArgumentParser(
-    prog="widgetron",
-    description="Creates an electron app for displaying the output cells of an interactive notebook.",
-)
-
-src_desc = """
-This is a shortcut to avoid needing to build a conda package for your source code.
-Widgetron is basically a big jinja template, if your notebook has `from my_package import my_widget`
-then you would pass C:/path/to/my_package, and the directory will by copied recursively
-into a package shell immediately next to the notebook.
-"""
-
-arguments = [
-    [["file"], {}, "Path to notebook to convert. (must be .ipynb)"],
-    [
-        ["-deps", "--dependencies"],
-        dict(nargs="+", default=[]),
-        "List of conda-forge packages required to run the widget (pip packages are not supported).",
-    ],
-    [
-        ["-c", "--channels"],
-        dict(nargs="+", default=["conda-forge"]),
-        "List of conda channels required to find specified packages. Order is obeyed, 'local' is always checked first. Default= ['conda-forge',]",
-    ],
-    [
-        ["-p", "--port"],
-        dict(default="8866"),
-        "4-digit port number on which the notebook will be hosted.",
-    ],
-    [
-        ["-n", "--name"],
-        {},
-        "Name of the application (defaults to the notebook name).",
-    ],
-    [["-o", "--outdir"], dict(default="."), "App version number."],
-    [["-v", "--version"], dict(default=1), ""],
-    [["-src", "--python_source_dir"], {}, src_desc],
-    [
-        ["-icon", "--icon"],
-        dict(default=DEFAULT_ICON),
-        "Icon for app. (windows->.ico, linux->.png/.svg, osx->.icns)",
-    ],
-]
-
-for flags, kwargs, desc in arguments:
-    kwargs["help"] = desc
-    parser.add_argument(*flags, **kwargs)
-
 
 def parse_arguments():
-    kwargs = parser.parse_args().__dict__
+    kwargs = CONFIG
+    if "environment_yaml" in kwargs:
+        with open(kwargs["environment_yaml"], "r") as f:
+            _env = yaml.safe_load(f)
+        print(f"Searching for dependencies in {kwargs['environment_yaml']}")
+        kwargs["dependencies"] = kwargs.get("dependencies", _env["dependencies"])
+        print(f"Searching for channels in {kwargs['environment_yaml']}")
+        kwargs["channels"] = kwargs.get("channels", _env["channels"])
+    else:
+        assert kwargs["dependencies"] is not None
+        assert kwargs["channels"] is not None
 
-    if kwargs["name"] is None:
-        kwargs["name"] = Path(kwargs["file"]).stem
+    kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
+    assert isinstance(kwargs["server_command"], list)
+    assert "version" in kwargs
+
+    kwargs["icon"] = kwargs.get("icon", DEFAULT_ICON)
+
+    kwargs["name"] = Path(kwargs["notebook"]).stem
 
     pat = re.compile(r"[^a-zA-Z0-9]")
     kwargs["name_nospace"] = pat.sub("_", kwargs["name"])
 
     kwargs["icon_name"] = Path(kwargs["icon"]).name
-    kwargs["temp_files"] = Path(kwargs["outdir"]) / "widgetron_temp_files"
-    kwargs["filename"] = Path(kwargs["file"]).name
+    kwargs["temp_files"] = Path("widgetron_temp_files")
+    kwargs["filename"] = Path(kwargs["notebook"]).name
+
     return kwargs
 
 
 def copy_source_code(kwargs):
     # Copy python source into template package
-    if kwargs["python_source_dir"]:
+    dest = kwargs["temp_files"] / "server/widgetron_app/notebooks"
+    dest.mkdir()
+
+    if "python_source_dir" in kwargs:
         if Path(kwargs["python_source_dir"]).is_dir():
             shutil.copytree(
                 kwargs["python_source_dir"],
-                kwargs["temp_files"]
-                / "server/widgetron_app"
-                / Path(kwargs["python_source_dir"]).stem,
+                dest / Path(kwargs["python_source_dir"]).stem,
             )
         elif Path(kwargs["python_source_dir"]).is_file():
             shutil.copy(
                 kwargs["python_source_dir"],
-                kwargs["temp_files"] / "server" / "widgetron_app",
+                dest,
             )
 
 
 def copy_notebook(kwargs):
     # Copy notebook into template
     # Check filetype
-    nb = Path(kwargs["file"])
+    dest = kwargs["temp_files"] / "server/widgetron_app/notebooks"
+    nb = Path(kwargs["notebook"])
+
     if nb.is_file():
         assert nb.suffix.lower() == ".ipynb", f"{nb} is not a notebook"
-        shutil.copy(nb, kwargs["temp_files"] / "server/widgetron_app")
+        shutil.copy(nb, dest)
     else:
         assert list(nb.glob("*.ipynb")), f"No notebooks found in {nb}"
-        assert not kwargs[
-            "python_source_dir"
-        ], "-src may only be provided if -f is a single .ipynb file"
-        shutil.copytree(
-            nb, kwargs["temp_files"] / f"server/widgetron_app/{nb.stem}"
-        )
+        shutil.copytree(nb, dest / nb.stem)
 
 
 def package_electron_app(kwargs):
@@ -134,12 +113,29 @@ def package_electron_app(kwargs):
     cwd = Path().absolute()
 
     os.chdir(str(kwargs["temp_files"] / "electron"))
+    os.mkdir("build")
+    # assert icon.suffix.lower() == ".png", "WIP: only png currently supported"
+    shutil.copy(str(icon), f"build/icon{icon.suffix}")
 
     call("npm install .", shell=True)
     call(
-        PACKAGE_ELECTRON_APPLICATION(icon),
+        "npm run build",
         shell=True,
     )
+    if OSX:
+        dist = "dist/mac"
+    elif LINUX:
+        dist = "dist/linux-unpacked"
+    elif WIN:
+        dist = "dist/win-unpacked"
+
+    os.chdir(dist)
+
+    with zipfile.ZipFile(
+        "../../../server/widgetron_app/ui.zip", "w", zipfile.ZIP_DEFLATED
+    ) as zipf:
+        zipdir(".", zipf)
+
     os.chdir(str(cwd))
 
 
@@ -156,6 +152,8 @@ def build_conda_package(kwargs):
 
 def build_installer(kwargs):
     dir = kwargs["temp_files"] / "constructor"
+    dir = dir.absolute()
+    os.chdir(kwargs["outdir"])
     call(f"constructor {dir}", shell=True)
 
 

@@ -1,0 +1,67 @@
+name: Build
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: '*'
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [
+          "ubuntu-latest", 
+          # "windows-latest", 
+          # "macOS-latest"
+        ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          environment-file: environment.yml
+          use-mamba: true
+
+      # - run: conda list
+
+      # - name: Test
+      #   run: |
+      #     mkdir installer_output
+      #     python -m pip install . --no-build-isolation
+      #     widgetron -h
+      #     widgetron examples/minesweeper -o=installer_output
+      
+      # - name: Upload Windows Installer
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: minesweeper-installer
+      #     path: installer_output/*
+      #     if-no-files-found: error
+      #   if: matrix.os == 'windows-latest'
+
+      - name: Package
+        run: |
+          set -eux
+
+          pip install build
+          python -m build
+        if: matrix.os == 'ubuntu-latest'
+        
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: package-artifacts
+          path: dist/*
+          if-no-files-found: error
+        if: matrix.os == 'ubuntu-latest'

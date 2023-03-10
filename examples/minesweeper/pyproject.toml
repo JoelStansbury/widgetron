@@ -1,0 +1,6 @@
+
+[tool.widgetron]
+notebook = "Minesweeper.ipynb"
+environment_yaml = "environment.yaml"
+server_command = ["jupyter", "lab", "--no-browser"]
+version = "0.1.0"

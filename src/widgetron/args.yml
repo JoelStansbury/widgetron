@@ -1,0 +1,60 @@
+
+directory:
+    default: "."
+    nargs: "?"
+    help: |
+        Directory to build in. This is also where the utility will search for
+        relevant config files (i.e. `environment.yml`, `setup.cfg`, `pyproject.toml`)
+
+outdir:
+    flag: "-o"
+    default: "."
+    help: "Where to put the installer."
+
+notebook:
+    flag: "-nb"
+    help: "Path to notebook to convert. (must be .ipynb)"
+
+version:
+    flag: "-v"
+    help: "Version number."
+
+environment_yaml:
+    flag: "-env"
+    help: "Path to environment.yml"
+    
+dependencies:
+    flag: "-deps"
+    nargs: "+"
+    help: |
+        List of conda-forge packages required to run the widget
+        (pip packages are not supported). Deduced from environment_yaml if None.
+
+channels:
+    flag: "-c"
+    nargs: "+"
+    help: |
+        List of conda channels required to find specified packages.
+        Order is obeyed, 'local' is always checked first. Default=['conda-forge',].
+        Deduced from environment_yaml if None.
+
+python_source_dir:
+    flag: "-src"
+    help: |
+        This is a shortcut to avoid needing to build a conda package for your source code.
+        Widgetron is basically a big jinja template, if your notebook has `from my_package import my_widget`
+        then you would pass C:/path/to/my_package, and the directory will by copied recursively
+        into a package shell immediately next to the notebook.
+
+server_command:
+    flag: "-sc"
+    nargs: "+"
+    help: How to launch JupyterLab. Default `["jupyter", "lab", "--no-browser"]`
+
+icon:
+    flag: "-icon"
+    help: |
+        256 by 256 icon file (must be appropriate to OS)
+            win: .ico
+            osx: .icns
+            linux: .png

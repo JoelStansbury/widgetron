@@ -21,7 +21,7 @@ How it Works
 ~~~~~~~~~~~~
 
 1. Builds and packages a minimal electron interface to navigate to
-   ``localhost:8866`` and boot up the ``voila`` server
+   ``localhost:8866`` and boot up the ``jupyter lab`` server
 2. Copies a notebook (specified by ``-f``) into a template python
    package
 3. Copies the entire contents of the built electron application into the
@@ -46,34 +46,53 @@ Help
 
 ::
 
-   usage: widgetron [-h] [-deps DEPENDENCIES [DEPENDENCIES ...]] [-c CHANNELS [CHANNELS ...]] [-p PORT] [-n NAME] [-o OUTDIR] [-v VERSION]
-                    [-src PYTHON_SOURCE_DIR] [-icon ICON]
-                    file
+   usage: widgetron [-h] [-o OUTDIR] [-nb NOTEBOOK] [-v VERSION]
+                  [-env ENVIRONMENT_YAML]
+                  [-deps DEPENDENCIES [DEPENDENCIES ...]]
+                  [-c CHANNELS [CHANNELS ...]] [-src PYTHON_SOURCE_DIR]
+                  [-sc SERVER_COMMAND [SERVER_COMMAND ...]] [-icon ICON]
+                  [directory]
 
-   Creates an electron app for displaying the output cells of an interactive notebook.
+   Creates an app for displaying the output cells of an interactive notebook.
 
    positional arguments:
-     file                  Path to notebook to convert. (must be .ipynb)
+   directory             Directory to build in. This is also where the utility
+                           will search for relevant config files (i.e.
+                           `environment.yml`, `setup.cfg`, `pyproject.toml`)
 
    options:
    -h, --help            show this help message and exit
-   -deps DEPENDENCIES [DEPENDENCIES ...], --dependencies DEPENDENCIES [DEPENDENCIES ...]
-                           List of conda-forge packages required to run the widget (pip packages are not supported).
-   -c CHANNELS [CHANNELS ...], --channels CHANNELS [CHANNELS ...]
-                           List of conda channels required to find specified packages. Order is obeyed, 'local' is always
-                           checked first. Default= ['conda-forge',]
-   -p PORT, --port PORT  4-digit port number on which the notebook will be hosted (if the port is in use, voila will scan for a free port).
-   -n NAME, --name NAME  Name of the application (defaults to the notebook name).
    -o OUTDIR, --outdir OUTDIR
-                           App version number.
+                           Where to put the installer.
+   -nb NOTEBOOK, --notebook NOTEBOOK
+                           Path to notebook to convert. (must be .ipynb)
    -v VERSION, --version VERSION
+                           Version number.
+   -env ENVIRONMENT_YAML, --environment_yaml ENVIRONMENT_YAML
+                           Path to environment.yml
+   -deps DEPENDENCIES [DEPENDENCIES ...], --dependencies DEPENDENCIES [DEPENDENCIES ...]
+                           List of conda-forge packages required to run the
+                           widget (pip packages are not supported). Deduced from
+                           environment_yaml if None.
+   -c CHANNELS [CHANNELS ...], --channels CHANNELS [CHANNELS ...]
+                           List of conda channels required to find specified
+                           packages. Order is obeyed, 'local' is always checked
+                           first. Default=['conda-forge',]. Deduced from
+                           environment_yaml if None.
    -src PYTHON_SOURCE_DIR, --python_source_dir PYTHON_SOURCE_DIR
-                           This is a shortcut to avoid needing to build a conda package for your source code. Widgetron
-                           is basically a big jinja template, if your notebook has `from my_package import my_widget`
-                           then you would pass C:/path/to/my_package, and the directory will by copied recursively into a
-                           package shell immediately next to the notebook.
+                           This is a shortcut to avoid needing to build a conda
+                           package for your source code. Widgetron is basically a
+                           big jinja template, if your notebook has `from
+                           my_package import my_widget` then you would pass
+                           C:/path/to/my_package, and the directory will by
+                           copied recursively into a package shell immediately
+                           next to the notebook.
+   -sc SERVER_COMMAND [SERVER_COMMAND ...], --server_command SERVER_COMMAND [SERVER_COMMAND ...]
+                           How to launch JupyterLab. Default `["jupyter", "lab",
+                           "--no-browser"]`
    -icon ICON, --icon ICON
-                           Icon for app. Must be a .ico file
+                           256 by 256 icon file (must be appropriate to OS) win:
+                           .ico osx: .icns linux: .png
 
 Example Usage
 -------------

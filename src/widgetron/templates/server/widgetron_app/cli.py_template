@@ -3,41 +3,56 @@ from pathlib import Path
 import platform
 import os
 import re
+import psutil
+from zipfile import ZipFile
 
 HERE = Path(__file__).parent
+os.chdir(str(HERE))
+for z in HERE.glob("*.zip"):
+    ZipFile(z.name).extractall(z.stem)
+    z.unlink()
 
 SYS = platform.uname().system
 if SYS == "Windows":
-    UI = str(next(HERE.rglob("*.exe")).absolute())
+    UI = str(next(HERE.rglob("widgetron.exe")).absolute())
 elif SYS == "Linux":
-    UI = [str(next(HERE.rglob("{{name}}"))), "--no-sandbox"]
+    UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
 else:
-    UI = [str(next(HERE.rglob("{{name}}"))), "--no-sandbox"]
+    UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
 
 def main():
-    os.chdir(str(HERE))
+    os.chdir("notebooks")
 
     # launch server in background
     server = subprocess.Popen(
-        ['voila', "{{filename}}", '--no-browser', '--port={{port}}'],
-        shell=False,
+        [{% for part in server_command %}'{{part}}',{% endfor %}],
+        shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
 
     # Wait for server to start
     l = str(server.stderr.readline())
-    while "http" not in l:
+    while "http://localhost:" not in l:
         print(l)
         l = str(server.stderr.readline())
 
-    # Read the output from voila and parse out the url
-    url = re.findall("http://localhost:\d\d\d\d", l)[0]
+    # Read the output from jupyter lab and parse out the url
+    url = re.findall("http://localhost:[a-z0-9:?/=]*", l)[0].strip()
+    token = url.split("token=")[1]
+    port = url.split("localhost:")[1].split("/lab")[0]
+    fname = "{{ filename }}"
+    url = f"http://localhost:{port}/lab/tree/{fname}?token={token}"
     print(url)
-    os.environ["widgetron_voila_url"] = url
+    os.environ["widgetron_url"] = url
 
     # open UI
     subprocess.call(UI)
 
-    # when UI stops, kill voila
-    server.kill()
+    # when UI stops, kill jupyter lab
+    def kill(proc_pid):
+        process = psutil.Process(proc_pid)
+        for proc in process.children(recursive=True):
+            proc.kill()
+        process.kill()
+    kill(server.pid)

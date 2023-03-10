@@ -5,11 +5,12 @@ channels:
   # - main  # Uncomment if using osx-arm64 install of python
 
 dependencies:
-  - python
-  - constructor
+  - python <=3.11
+  - constructor <4
   - boa
-  - voila
-  - nodejs
-  - jupyterlab
+  - nodejs >18, <19
+  - jupyterlab >3, <4
+  - toml
+  - yaml
   - black
   - isort

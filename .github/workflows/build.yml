@@ -15,14 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["ubuntu-latest"]
-        include:
-        - os: ubuntu-latest
-          path: ~/.cache/pip
-        # - os: macos-latest
-        #   path: ~/Library/Caches/pip
-        # - os: windows-latest
-        #   path: ~\AppData\Local\pip\Cache
+        os: ["ubuntu-latest", "windows-latest", "macOS-latest"]
 
     steps:
       - name: Checkout
@@ -40,10 +33,18 @@ jobs:
 
       - name: Test
         run: |
-          mkdir dist
+          mkdir installer_output
           python -m pip install . --no-build-isolation
           widgetron -h
-          widgetron examples/minesweeper -o=dist
+          widgetron examples/minesweeper -o=installer_output
+      
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: minesweeper-installer
+          path: installer_output/*
+          if-no-files-found: error
+        if: matrix.os == 'windows-latest'
 
       - name: Package
         run: |
@@ -51,10 +52,12 @@ jobs:
 
           pip install build
           python -m build
+        if: matrix.os == 'ubuntu-latest'
         
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: extension-artifacts
+          name: package-artifacts
           path: dist/*
           if-no-files-found: error
+        if: matrix.os == 'ubuntu-latest'

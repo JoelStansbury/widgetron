@@ -10,6 +10,7 @@ dependencies:
   - boa
   - nodejs >18, <19
   - jupyterlab >3, <4
+  - toml
   - yaml
   - black
   - isort

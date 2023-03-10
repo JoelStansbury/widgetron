@@ -43,7 +43,7 @@ explicit_lock:
     help: |
         Path to lock file generated via `conda-lock --kind=explicit`.
 
-python_source_dir:
+python_source:
     flag: "-src"
     help: |
         This is a shortcut to avoid needing to build a conda package for your source code.

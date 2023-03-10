@@ -122,8 +122,13 @@ def package_electron_app(kwargs):
         "npm run build",
         shell=True,
     )
+    if OSX:
+        dist = "dist/mac"
+    elif LINUX:
+        dist = "dist/linux-unpacked"
+    elif WIN:
+        dist = "dist/win-unpacked"
 
-    dist = list(Path("dist").glob("*-unpacked"))[0]
     os.chdir(dist)
 
     with zipfile.ZipFile(

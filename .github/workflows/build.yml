@@ -8,6 +8,9 @@ on:
 
 jobs:
   build:
+    defaults:
+      run:
+        shell: bash -l {0}
     name: Build ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:

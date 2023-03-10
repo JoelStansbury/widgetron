@@ -1,7 +1,7 @@
 
 directory:
-    flag: "-dir"
     default: "."
+    nargs: "?"
     help: |
         Directory to build in. This is also where the utility will search for
         relevant config files (i.e. `environment.yml`, `setup.cfg`, `pyproject.toml`)

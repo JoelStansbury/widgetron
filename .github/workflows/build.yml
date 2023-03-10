@@ -43,7 +43,7 @@ jobs:
           mkdir dist
           python -m pip install . --no-build-isolation
           widgetron -h
-          widgetron -dir=examples/minesweeper -o=dist
+          widgetron examples/minesweeper -o=dist
 
       - name: Package
         run: |

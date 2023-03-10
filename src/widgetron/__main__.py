@@ -70,7 +70,7 @@ def parse_arguments():
     kwargs["name_nospace"] = pat.sub("_", kwargs["name"])
 
     kwargs["icon_name"] = Path(kwargs["icon"]).name
-    kwargs["temp_files"] = Path(kwargs["outdir"]) / "widgetron_temp_files"
+    kwargs["temp_files"] = Path("widgetron_temp_files")
     kwargs["filename"] = Path(kwargs["notebook"]).name
 
     return kwargs
@@ -147,6 +147,8 @@ def build_conda_package(kwargs):
 
 def build_installer(kwargs):
     dir = kwargs["temp_files"] / "constructor"
+    dir = dir.absolute()
+    os.chdir(kwargs["outdir"])
     call(f"constructor {dir}", shell=True)
 
 

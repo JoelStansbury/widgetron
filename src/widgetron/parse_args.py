@@ -38,9 +38,10 @@ def config():
     with ARGS_FILE.open() as f:
         args = yaml.safe_load(f)
     for k, v in args.items():
-        flags = [v.pop("flag"), "--" + k]
+        flags = [v.pop("flag"), "--" + k] if "flag" in v else [k]
         parser.add_argument(*flags, **v)
     kwargs = parser.parse_args()
+    kwargs.outdir = Path(kwargs.outdir).absolute()
     os.chdir(kwargs.directory)
     res = defaults()
     res.update({k: v for k, v in kwargs.__dict__.items() if v is not None})

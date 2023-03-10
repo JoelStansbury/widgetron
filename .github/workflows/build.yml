@@ -15,6 +15,17 @@ jobs:
         os: ["ubuntu-latest", "windows-latest"]
 
     steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Mambaforge
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniforge-variant: Mambaforge
+        miniforge-version: latest
+        activate-environment: dev
+        use-mamba: true
 
     - name: Set cache date
       run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
@@ -25,17 +36,10 @@ jobs:
         key: ${{ matrix.label }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
       id: cache
 
-    
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Update Environment
+      run: mamba env update -n dev -f environment.yml
+      if: steps.cache.outputs.cache-hit != 'true'
 
-    - name: Prepare
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        activate-environment: dev
-        environment-file: environment.yml
-
-    
     - name: Test
       run: |
         mkdir dist

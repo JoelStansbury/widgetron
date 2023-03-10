@@ -39,8 +39,7 @@ jobs:
         cd ../
         widgetron examples/minesweeper -o dist
 
-
-    - name: Upload extension packages
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: extension-artifacts

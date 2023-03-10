@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["ubuntu-latest"]
+        os: ["ubuntu-latest", "windows-latest"]
 
     steps:
     - name: Checkout
@@ -24,17 +24,21 @@ jobs:
         activate-environment: dev
         environment-file: environment.yml
 
-    - name: Build the extension
-      run: |
-        set -eux
-        python -m pip install .[test]
-
-    - name: Package the extension
+    - name: Package
       run: |
         set -eux
 
         pip install build
         python -m build
+    
+    - name: Test
+      run: |
+        cd dist
+        python -m pip install widgetron --no-build-isolation
+        widgetron -h
+        cd ../
+        widgetron examples/minesweeper -o dist
+
 
     - name: Upload extension packages
       uses: actions/upload-artifact@v3

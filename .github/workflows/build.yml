@@ -24,21 +24,21 @@ jobs:
         activate-environment: dev
         environment-file: environment.yml
 
+    
+    - name: Test
+      run: |
+        mkdir dist
+        python -m pip install . --no-build-isolation
+        widgetron -h
+        widgetron examples/minesweeper -o dist
+
     - name: Package
       run: |
         set -eux
 
         pip install build
         python -m build
-    
-    - name: Test
-      run: |
-        cd dist
-        python -m pip install widgetron --no-build-isolation
-        widgetron -h
-        cd ../
-        widgetron examples/minesweeper -o dist
-
+      
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:

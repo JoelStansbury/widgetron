@@ -39,10 +39,9 @@ except Exception as e:
     print("Could not find PyPi credentials... PyPi Distribution Disabled")
 
 class PyPi:
-    update_build_deps = "python -m pip install --upgrade build twine"
-    build = f"python -m build --outdir dist/pypi {SRC}"
-    upload = f"python -m twine upload --repository pypi dist/pypi/* -u {PYPI_USERNAME} -p {PYPI_PASSWORD}"
-    distribute = f"{CONDA.activate} && {update_build_deps} && {build} && {upload}"
+    update_build_deps = "python -m pip install --upgrade twine"
+    upload = f"python -m twine upload --repository pypi dist/* -u {PYPI_USERNAME} -p {PYPI_PASSWORD}"
+    distribute = f"{CONDA.activate} && {update_build_deps} && {upload}"
 
 sort_imports = f"isort {SRC}"
 black_format = f"black {SRC} -l 79"
@@ -65,7 +64,7 @@ def task_lab():
     return _do(f"{CONDA.activate} && jupyter lab")
 
 def task_publish():
-    return _do(CLEAN, PyPi.distribute)
+    return _do(PyPi.distribute)
 
 def task_condabuild():
     return _do(CLEAN, CONDA.build)

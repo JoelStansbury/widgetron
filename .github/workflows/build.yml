@@ -47,6 +47,9 @@ jobs:
       run: mamba env update -n dev -f environment.yml
       if: steps.cache.outputs.cache-hit != 'true'
 
+    - name: Conda List
+      run: conda list
+
     - name: Test
       run: |
         mkdir dist

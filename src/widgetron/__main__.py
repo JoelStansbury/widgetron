@@ -70,6 +70,9 @@ def parse_arguments():
         kwargs["channels"] +=  _env["channels"]
 
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
+    if isinstance(kwargs["server_command"], str):
+        kwargs["server_command"]=kwargs["server_command"].strip().split()
+
     assert isinstance(kwargs["server_command"], list)
     assert "version" in kwargs
 

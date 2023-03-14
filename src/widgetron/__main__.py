@@ -49,6 +49,12 @@ def parse_arguments():
     kwargs = CONFIG
     kwargs["dependencies"] = kwargs.get("dependencies", [])
     kwargs["channels"] = kwargs.get("channels", [])
+
+    if isinstance(kwargs["dependencies"], str):
+        kwargs["dependencies"]=kwargs["dependencies"].strip().split()
+    if isinstance(kwargs["channels"], str):
+        kwargs["channels"]=kwargs["channels"].strip().split()
+
     if "explicit_lock" in kwargs:
         with open(kwargs["explicit_lock"], "r") as f:
             l = f.readline()

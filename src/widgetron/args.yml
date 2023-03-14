@@ -28,7 +28,8 @@ dependencies:
     nargs: "+"
     help: |
         List of conda-forge packages required to run the widget
-        (pip packages are not supported). Deduced from environment_yaml if None.
+        (pip packages are not supported). If environment_yaml or explicit_lock
+        are also provided, then those are appended to the list of dependencies.
 
 channels:
     flag: "-c"
@@ -36,7 +37,8 @@ channels:
     help: |
         List of conda channels required to find specified packages.
         Order is obeyed, 'local' is always checked first. Default=['conda-forge',].
-        Deduced from environment_yaml if None.
+        If environment_yaml or explicit_lock are also provided, then those are
+        appended to the list of channels.
 
 explicit_lock:
     flag: "-lock"

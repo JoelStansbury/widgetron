@@ -47,24 +47,21 @@ else:
 
 def parse_arguments():
     kwargs = CONFIG
+    kwargs["dependencies"] = kwargs.get("dependencies", [])
+    kwargs["channels"] = kwargs.get("channels", [])
     if "explicit_lock" in kwargs:
-        kwargs["channels"] = []
-        kwargs["dependencies"] = []
         with open(kwargs["explicit_lock"], "r") as f:
             l = f.readline()
             while "@EXPLICIT" not in l:
                 l = f.readline()
-            kwargs["dependencies"] = [s.strip() for s in f.readlines()]
+            kwargs["dependencies"] += [s.strip() for s in f.readlines()]
     elif "environment_yaml" in kwargs:
         with open(kwargs["environment_yaml"], "r") as f:
             _env = yaml.safe_load(f)
         print(f"Searching for dependencies in {kwargs['environment_yaml']}")
-        kwargs["dependencies"] = kwargs.get("dependencies", _env["dependencies"])
+        kwargs["dependencies"] += _env["dependencies"]
         print(f"Searching for channels in {kwargs['environment_yaml']}")
-        kwargs["channels"] = kwargs.get("channels", _env["channels"])
-    else:
-        assert kwargs["dependencies"] is not None
-        assert kwargs["channels"] is not None
+        kwargs["channels"] +=  _env["channels"]
 
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
     assert isinstance(kwargs["server_command"], list)

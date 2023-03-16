@@ -93,6 +93,8 @@ def parse_arguments():
     # https://www.electron.build/multi-platform-build.html
     kwargs["constructor_kwargs"] = {}
 
+    # TODO: include logic for setting installer type
+    # https://github.com/conda/constructor/blob/main/CONSTRUCT.md#installer_type
     if "target" in kwargs:
         if kwargs["target"] == "win":
             kwargs["constructor_target"] = "win-64"

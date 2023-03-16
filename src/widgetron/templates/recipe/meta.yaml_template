@@ -6,6 +6,7 @@ source:
   path: ../server  # relative to this file
 
 build:
+  noarch: python
   number: 0
   script: python -m pip install .  # [not win]
   entry_points:

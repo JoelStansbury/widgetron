@@ -65,3 +65,27 @@ icon:
             win: .ico
             osx: .icns
             linux: .png
+
+target:
+    flag: "-t"
+    help: |
+        Target Platform. (win, linux, mac). Supported targets
+            win   -> linux
+            win   -> win
+            linux -> win
+            linux -> linux
+            mac   -> linux
+            mac   -> mac
+        All other source -> target permutations are blocked either by 
+        conda constructor or electron-builder (primarily due to licensing).
+        osx-64 -> osx-arm64 is theoretically possible, but not yet supported.
+
+conda_exe:
+    flag: "-cexe"
+    help: |
+        If targeting a non-native platform, then an exe must be provided.
+        Get one from https://repo.anaconda.com/pkgs/misc/conda-execs/
+
+        e.g. for win -> linux
+        * Download https://repo.anaconda.com/pkgs/misc/conda-execs/conda-latest-linux-64.exe
+        * provide the path to it in this argument.

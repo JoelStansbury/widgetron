@@ -37,10 +37,13 @@ DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
 
 if WIN:
     DEFAULT_ICON = HERE / "icons/widgetron.ico"
+    DEFAULT_TARGET = "win"
 elif LINUX:
     DEFAULT_ICON = HERE / "icons/widgetron.png"
+    DEFAULT_TARGET = "linux"
 elif OSX:
     DEFAULT_ICON = HERE / "icons/widgetron.icns"
+    DEFAULT_TARGET = "mac"
 else:
     raise OSError(f"Unknown platform {platform.system()}")
 
@@ -87,6 +90,25 @@ def parse_arguments():
     kwargs["temp_files"] = Path("widgetron_temp_files")
     kwargs["filename"] = Path(kwargs["notebook"]).name
 
+    # https://www.electron.build/multi-platform-build.html
+    kwargs["constructor_kwargs"] = {}
+
+    # TODO: include logic for setting installer type
+    # https://github.com/conda/constructor/blob/main/CONSTRUCT.md#installer_type
+    if "target" in kwargs:
+        if kwargs["target"] == "win":
+            kwargs["constructor_target"] = "win-64"
+            kwargs["electron_target"] = "win"
+        if kwargs["target"] == "linux":
+            kwargs["constructor_target"] = "linux-64"
+            kwargs["electron_target"] = "linux"
+        if kwargs["target"] == "mac":
+            assert OSX, "Electron-builder can only build mac from a mac"
+            kwargs["constructor_target"] = "osx-64"
+            kwargs["electron_target"] = "mac"
+    else:
+        # Leaving constructor_target empty lets constructor infer the best one
+        kwargs["electron_target"] = DEFAULT_TARGET
     return kwargs
 
 
@@ -136,11 +158,11 @@ def package_electron_app(kwargs):
         "npm run build",
         shell=True,
     )
-    if OSX:
+    if kwargs["electron_target"] == "mac":
         dist = "dist/mac"
-    elif LINUX:
+    elif kwargs["electron_target"] == "linux":
         dist = "dist/linux-unpacked"
-    elif WIN:
+    elif kwargs["electron_target"] == "win":
         dist = "dist/win-unpacked"
 
     os.chdir(dist)
@@ -168,7 +190,10 @@ def build_installer(kwargs):
     dir = kwargs["temp_files"] / "constructor"
     dir = dir.absolute()
     os.chdir(kwargs["outdir"])
-    call(f"constructor {dir}", shell=True)
+
+    platform = f"--platform={kwargs['constructor_target']}" if "constructor_target" in kwargs else ""
+    cexe = f"--conda-exe={kwargs['conda_exe']}" if "conda_exe" in kwargs else ""
+    call(f"constructor {dir} {platform} {cexe}", shell=True)
 
 
 def cli():

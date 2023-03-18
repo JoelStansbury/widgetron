@@ -71,30 +71,25 @@ Help
    -env ENVIRONMENT_YAML, --environment_yaml ENVIRONMENT_YAML
                            Path to environment.yml
    -deps DEPENDENCIES [DEPENDENCIES ...], --dependencies DEPENDENCIES [DEPENDENCIES ...]
-                           List of conda-forge packages required to run the
-                           widget (pip packages are not supported). Deduced from
-                           environment_yaml if None.
+                           List of conda-forge packages required to run the widget (pip packages are not
+                           supported). If environment_yaml or explicit_lock are also provided, then those
+                           are appended to the list of dependencies.
    -c CHANNELS [CHANNELS ...], --channels CHANNELS [CHANNELS ...]
-                           List of conda channels required to find specified
-                           packages. Order is obeyed, 'local' is always checked
-                           first. Default=['conda-forge',]. Deduced from
-                           environment_yaml if None.
-   -src PYTHON_SOURCE_DIR, --python_source_dir PYTHON_SOURCE_DIR
-                           This is a shortcut to avoid needing to build a conda
-                           package for your source code. Widgetron is basically a
-                           big jinja template, if your notebook has `from
-                           my_package import my_widget` then you would pass
-                           C:/path/to/my_package, and the directory will by
-                           copied recursively into a package shell immediately
-                           next to the notebook.
+                           List of conda channels required to find specified packages. Order is obeyed,
+                           'local' is always checked first. Default=['conda-forge',]. If environment_yaml or
+                           explicit_lock are also provided, then those are appended to the list of channels.
    -lock EXPLICIT_LOCK, --explicit_lock EXPLICIT_LOCK
                            Path to lock file generated via `conda-lock --kind=explicit`.
+   -src PYTHON_SOURCE, --python_source PYTHON_SOURCE
+                           This is a shortcut to avoid needing to build a conda package for your source
+                           code. Widgetron is basically a big jinja template, if your notebook has `from
+                           my_package import my_widget` then you would pass C:/path/to/my_package, and the
+                           directory will by copied recursively into a package shell immediately next to the
+                           notebook.
    -sc SERVER_COMMAND [SERVER_COMMAND ...], --server_command SERVER_COMMAND [SERVER_COMMAND ...]
-                           How to launch JupyterLab. Default `["jupyter", "lab",
-                           "--no-browser"]`
+                           How to launch JupyterLab. Default `["jupyter", "lab", "--no-browser"]`
    -icon ICON, --icon ICON
-                           256 by 256 icon file (must be appropriate to OS) win:
-                           .ico osx: .icns linux: .png
+                           256 by 256 icon file (must be appropriate to OS) win: .ico osx: .icns linux: .png
 
 Example Usage
 -------------

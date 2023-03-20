@@ -6,7 +6,6 @@ import sys
 import zipfile
 from pathlib import Path
 from subprocess import call
-import warnings
 
 import yaml
 

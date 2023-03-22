@@ -65,6 +65,13 @@ def parse_arguments():
     kwargs["dependencies"] = kwargs.get("dependencies", [])
     kwargs["channels"] = kwargs.get("channels", ["https://conda.anaconda.org/conda-forge"])
 
+    # kwargs['no_electron'] = kwargs.get('no_electron', "False")
+    # assert kwargs['no_electron'].strip().lower() in ['true', 'false']
+    # kwargs['no_electron'] = kwargs['no_electron'].strip().lower() == 'true'
+    # If not using electron, then there is no way to programatically quit jupyter lab
+    # without a custom UI element
+    # TODO assert kwargs['windows_cmd_style'] is not Hidden if electron is skipped
+
     if isinstance(kwargs["dependencies"], str):
         kwargs["dependencies"]=kwargs["dependencies"].strip().split()
     if isinstance(kwargs["channels"], str):

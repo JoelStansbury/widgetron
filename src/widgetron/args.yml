@@ -66,6 +66,17 @@ icon:
             osx: .icns
             linux: .png
 
+windows_cmd_style:
+    flag: "-windows_cmd_style"
+    default: Hidden
+    choices:
+        - Hidden
+        - Minimized
+        - Maximize
+        - Hidden
+    help: |
+        Sets the window style for the server running in powershell.
+
 # CONSTRUCTOR_PARAMS
 company:
     flag: "-company"
@@ -129,6 +140,11 @@ header_image:
 
 default_image_color:
     flag: "-default_image_color"
+    choices:
+        - red
+        - green
+        - blue
+        - yellow
     help: |
         The color of the default images (when not providing explicit image files) 
         used on Windows. Possible values are red, green, blue, yellow. The default is blue.

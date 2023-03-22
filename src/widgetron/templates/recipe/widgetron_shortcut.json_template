@@ -3,7 +3,7 @@
     "menu_items": [
         {
             "name": "{{name}}",
-            "system": "cmd.exe /c powershell -WindowStyle Hidden -Command",
+            "system": "cmd.exe /c {% if hide_cmd_prompt %}powershell -WindowStyle Hidden -Command{% endif %}",
             "scriptarguments": [
                 "cmd.exe /c '${PREFIX}/Scripts/activate.bat && {{ name_nospace }}'"
             ],

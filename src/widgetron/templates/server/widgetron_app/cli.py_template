@@ -20,7 +20,9 @@ elif SYS == "Linux":
 else:
     UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
 
-def main():
+SKIP_ELECTRON = "{{ no_electron }}".strip().lower() == "true"
+
+def main_electron():
     os.chdir("notebooks")
 
     # launch server in background
@@ -56,3 +58,9 @@ def main():
             proc.kill()
         process.kill()
     kill(server.pid)
+
+def main_browser():
+    os.chdir("notebooks")
+    subprocess.call([{% for part in server_command %}'{{part}}',{% endfor %}])
+    
+main = main_browser if SKIP_ELECTRON else main_electron

@@ -4,3 +4,7 @@ notebook = "Minesweeper.ipynb"
 environment_yaml = "environment.yaml"
 server_command = ["jupyter", "lab", "--no-browser"]
 version = "0.1.0"
+license_file = "LICENSE"
+installer_filename = "name.exe"
+welcome_image = "assets/welcome_image.png"
+header_image_text = "header text"

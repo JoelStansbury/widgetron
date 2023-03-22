@@ -32,7 +32,7 @@ WIN = platform.system() == "Windows"
 LINUX = platform.system() == "Linux"
 OSX = platform.system() == "Darwin"
 
-CONDA_BUILD = "conda-mambabuild {} -c conda-forge"
+CONDA_BUILD = "conda-mambabuild {} -c https://conda.anaconda.org/conda-forge"
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
 
 if WIN:
@@ -48,7 +48,7 @@ else:
 def parse_arguments():
     kwargs = CONFIG
     kwargs["dependencies"] = kwargs.get("dependencies", [])
-    kwargs["channels"] = kwargs.get("channels", [])
+    kwargs["channels"] = kwargs.get("channels", ["https://conda.anaconda.org/conda-forge"])
 
     if isinstance(kwargs["dependencies"], str):
         kwargs["dependencies"]=kwargs["dependencies"].strip().split()
@@ -64,9 +64,7 @@ def parse_arguments():
     elif "environment_yaml" in kwargs:
         with open(kwargs["environment_yaml"], "r") as f:
             _env = yaml.safe_load(f)
-        print(f"Searching for dependencies in {kwargs['environment_yaml']}")
         kwargs["dependencies"] += _env["dependencies"]
-        print(f"Searching for channels in {kwargs['environment_yaml']}")
         kwargs["channels"] +=  _env["channels"]
 
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)

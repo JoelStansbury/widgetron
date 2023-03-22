@@ -27,7 +27,7 @@ dependencies:
     flag: "-deps"
     nargs: "+"
     help: |
-        List of conda-forge packages required to run the widget
+        List of conda packages required to run the widget
         (pip packages are not supported). If environment_yaml or explicit_lock
         are also provided, then those are appended to the list of dependencies.
 
@@ -36,7 +36,7 @@ channels:
     nargs: "+"
     help: |
         List of conda channels required to find specified packages.
-        Order is obeyed, 'local' is always checked first. Default=['conda-forge',].
+        Order is obeyed, 'local' is always checked first. Default=[https://conda.anaconda.org/conda-forge, ].
         If environment_yaml or explicit_lock are also provided, then those are
         appended to the list of channels.
 

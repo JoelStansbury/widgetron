@@ -44,6 +44,21 @@ elif OSX:
 else:
     raise OSError(f"Unknown platform {platform.system()}")
 
+# Single valued parameters specific to the construc.yaml filekwargs["temp_files"]
+CONSTRUCTOR_PARAMS = {
+    "company": str,
+    "installer_filename": str,
+    "installer_type": str,
+    "license_file": lambda x:Path(x).absolute(),
+    "batch_mode": str,
+    "signing_identity_name": str,
+    "welcome_image": lambda x:Path(x).absolute(),
+    "header_image": lambda x:Path(x).absolute(),
+    "default_image_color": str,
+    "welcome_image_text": str,
+    "header_image_text": str,
+    "nsis_template": lambda x:Path(x).absolute(),
+}
 
 def parse_arguments():
     kwargs = CONFIG
@@ -84,6 +99,11 @@ def parse_arguments():
     kwargs["icon_name"] = Path(kwargs["icon"]).name
     kwargs["temp_files"] = Path("widgetron_temp_files")
     kwargs["filename"] = Path(kwargs["notebook"]).name
+
+    kwargs["constructor_params"] = {
+        p: CONSTRUCTOR_PARAMS[p](kwargs[p])
+        for p in CONSTRUCTOR_PARAMS if p in kwargs
+    }
 
     return kwargs
 
@@ -164,9 +184,7 @@ def build_conda_package(kwargs):
 
 def build_installer(kwargs):
     dir = kwargs["temp_files"] / "constructor"
-    dir = dir.absolute()
-    os.chdir(kwargs["outdir"])
-    call(f"constructor {dir}", shell=True)
+    call(f"constructor {dir} --output-dir {kwargs['outdir']}", shell=True)
 
 
 def cli():

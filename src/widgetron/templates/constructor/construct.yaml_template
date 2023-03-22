@@ -8,7 +8,13 @@ specs:
   - python
   - widgetron_app
   - menuinst >=1.4.17  # [win]
-  - jupyterlab{% for package in dependencies %}
-  - {{package}}{% endfor %}
+  - jupyterlab
+{%- for package in dependencies %}
+  - {{package}}
+{%- endfor %}
+
 register_python_default: false
 icon_image: "../recipe/{{icon_name}}"
+{%- for key, value in constructor_params.items() %}
+{{key}}: {{value}}
+{%- endfor %}

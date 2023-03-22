@@ -44,7 +44,7 @@ elif OSX:
 else:
     raise OSError(f"Unknown platform {platform.system()}")
 
-# Single valued parameters specific to the construc.yaml filekwargs["temp_files"]
+# Single valued parameters specific to the construc.yaml file
 CONSTRUCTOR_PARAMS = {
     "company": str,
     "installer_filename": str,

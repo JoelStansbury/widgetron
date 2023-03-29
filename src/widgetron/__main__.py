@@ -11,6 +11,7 @@ import yaml
 
 from .parse_args import CONFIG
 
+
 def zipdir(path, ziph):
     # ziph is zipfile handle
     for root, dirs, files in os.walk(path):

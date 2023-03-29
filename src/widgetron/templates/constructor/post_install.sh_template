@@ -1,0 +1,5 @@
+touch ~/Desktop/{{name_nospace}}.sh
+echo "source $PREFIX/etc/profile.d/conda.sh" >> ~/Desktop/{{name_nospace}}.sh
+echo "conda activate $PREFIX/" >> ~/Desktop/{{name_nospace}}.sh
+echo "{{name_nospace}}" >> ~/Desktop/{{name_nospace}}.sh
+chmod +x ~/Desktop/{{name_nospace}}.sh

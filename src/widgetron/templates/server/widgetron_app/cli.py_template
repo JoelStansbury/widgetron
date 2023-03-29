@@ -8,17 +8,16 @@ from zipfile import ZipFile
 
 HERE = Path(__file__).parent
 os.chdir(str(HERE))
-for z in HERE.glob("*.zip"):
-    ZipFile(z.name).extractall(z.stem)
-    z.unlink()
 
 SYS = platform.uname().system
 if SYS == "Windows":
-    UI = str(next(HERE.rglob("widgetron.exe")).absolute())
-elif SYS == "Linux":
-    UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
+    for z in HERE.glob("*.zip"):
+        ZipFile(z.name).extractall(z.stem)
+        z.unlink()
 else:
-    UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
+    for z in HERE.glob("*.zip"):
+        subprocess.call(["unzip", str(z)])
+        z.unlink()
 
 def main():
     os.chdir("notebooks")
@@ -26,7 +25,7 @@ def main():
     # launch server in background
     server = subprocess.Popen(
         [{% for part in server_command %}'{{part}}',{% endfor %}],
-        shell=True,
+        shell= (SYS == "Windows"),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
@@ -34,7 +33,8 @@ def main():
     # Wait for server to start
     l = str(server.stderr.readline())
     while "http://localhost:" not in l:
-        print(l)
+        if l != "b''":
+            print(l)
         l = str(server.stderr.readline())
 
     # Read the output from jupyter lab and parse out the url
@@ -47,6 +47,13 @@ def main():
     os.environ["widgetron_url"] = url
 
     # open UI
+    if SYS == "Darwin":
+        UI = ["open", "-W", str(HERE.absolute() / "widgetron.app"), "--env", f"widgetron_url={url}"]
+    if SYS == "Linux":
+        UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
+    if SYS == "Windows":
+        UI = str(next(HERE.rglob("widgetron.exe")).absolute())
+    
     subprocess.call(UI)
 
     # when UI stops, kill jupyter lab

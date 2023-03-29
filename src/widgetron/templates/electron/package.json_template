@@ -14,11 +14,11 @@
     },
     "linux": {
       "icon": "build/icon.png",
-      "target": "dir"
+      "target": "zip"
     },
     "mac": {
       "icon": "build/icon.icns",
-      "target": "dir"
+      "target": "zip"
     }
   },
   "devDependencies": {

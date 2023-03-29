@@ -11,6 +11,11 @@ import yaml
 
 from .parse_args import CONFIG
 
+def rchmod(path: Path | str, mode: int):
+    path = Path(path).absolute()
+    assert path.exists(), "Invalid Path... Does not exist"
+    for p in path.rglob("*"):
+        os.chmod(str(p), mode)
 
 def zipdir(path, ziph):
     # ziph is zipfile handle
@@ -155,18 +160,26 @@ def package_electron_app(kwargs):
         shell=True,
     )
     if OSX:
-        dist = "dist/mac"
+        dist = "dist"
     elif LINUX:
         dist = "dist/linux-unpacked"
     elif WIN:
         dist = "dist/win-unpacked"
 
+    # rchmod(dist, 755)
     os.chdir(dist)
 
-    with zipfile.ZipFile(
-        "../../../server/widgetron_app/ui.zip", "w", zipfile.ZIP_DEFLATED
-    ) as zipf:
-        zipdir(".", zipf)
+    if OSX:
+        src = list(Path().glob("widgetron*.zip"))[0]
+        dst = "../../server/widgetron_app"
+        print(f"OSX: Moving '{src}' to '{dst / src}'")
+        shutil.move(src, dst / src)
+        assert (dst / src).exists(), "Move Failed"
+    else:
+        with zipfile.ZipFile(
+            "../../../server/widgetron_app/ui.zip", "w", zipfile.ZIP_DEFLATED
+        ) as zipf:
+            zipdir(".", zipf)
 
     os.chdir(str(cwd))
 

@@ -6,8 +6,6 @@ This command line utility builds a standalone executable installer for a
 single ipython notebook. It is intended for applications built with
 ipywidgets.
 
-- Not tested on osx
-
 Quickstart
 ----------
 

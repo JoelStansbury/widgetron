@@ -11,12 +11,6 @@ import yaml
 
 from .parse_args import CONFIG
 
-def rchmod(path: Path | str, mode: int):
-    path = Path(path).absolute()
-    assert path.exists(), "Invalid Path... Does not exist"
-    for p in path.rglob("*"):
-        os.chmod(str(p), mode)
-
 def zipdir(path, ziph):
     # ziph is zipfile handle
     for root, dirs, files in os.walk(path):
@@ -166,7 +160,6 @@ def package_electron_app(kwargs):
     elif WIN:
         dist = "dist/win-unpacked"
 
-    # rchmod(dist, 755)
     os.chdir(dist)
 
     if OSX:

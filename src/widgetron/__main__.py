@@ -164,7 +164,7 @@ def package_electron_app(kwargs):
     if OSX or LINUX:
         src = list(Path().glob("widgetron*.zip"))[0]
         dst = "../../server/widgetron_app"
-        print(f"OSX: Moving '{src}' to '{dst / src}'")
+        print(f"Moving '{src}' to '{dst / src}'")
         shutil.move(src, dst / src)
         assert (dst / src).exists(), "Move Failed"
     elif WIN:

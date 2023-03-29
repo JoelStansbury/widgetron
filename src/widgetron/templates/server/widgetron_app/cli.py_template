@@ -11,15 +11,9 @@ os.chdir(str(HERE))
 
 SYS = platform.uname().system
 if SYS == "Windows":
-    UI = str(next(HERE.rglob("widgetron.exe")).absolute())
     for z in HERE.glob("*.zip"):
         ZipFile(z.name).extractall(z.stem)
         z.unlink()
-elif SYS == "Linux":
-    for z in HERE.glob("*.zip"):
-        subprocess.call(["unzip", str(z)])
-        z.unlink()
-    UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
 else:
     for z in HERE.glob("*.zip"):
         subprocess.call(["unzip", str(z)])
@@ -55,6 +49,11 @@ def main():
     # open UI
     if SYS == "Darwin":
         UI = ["open", "-W", str(HERE.absolute() / "widgetron.app"), "--env", f"widgetron_url={url}"]
+    if SYS == "Linux":
+        UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
+    if SYS == "Windows":
+        UI = str(next(HERE.rglob("widgetron.exe")).absolute())
+    
     subprocess.call(UI)
 
     # when UI stops, kill jupyter lab

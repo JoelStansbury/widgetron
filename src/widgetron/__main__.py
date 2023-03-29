@@ -154,22 +154,20 @@ def package_electron_app(kwargs):
         "npm run build",
         shell=True,
     )
-    if OSX:
+    if OSX or LINUX:
         dist = "dist"
-    elif LINUX:
-        dist = "dist/linux-unpacked"
     elif WIN:
         dist = "dist/win-unpacked"
 
     os.chdir(dist)
 
-    if OSX:
+    if OSX or LINUX:
         src = list(Path().glob("widgetron*.zip"))[0]
         dst = "../../server/widgetron_app"
         print(f"OSX: Moving '{src}' to '{dst / src}'")
         shutil.move(src, dst / src)
         assert (dst / src).exists(), "Move Failed"
-    else:
+    elif WIN:
         with zipfile.ZipFile(
             "../../../server/widgetron_app/ui.zip", "w", zipfile.ZIP_DEFLATED
         ) as zipf:

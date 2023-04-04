@@ -110,8 +110,9 @@ def parse_arguments():
 
 def copy_source_code(kwargs):
     # Copy python source into template package
+    # notebook dir already exists due to debug notebook
     dest = kwargs["temp_files"] / "server/widgetron_app/notebooks"
-    dest.mkdir()
+    # TODO: alter dest if kwargs["notebook"] is a directory
 
     if "python_source" in kwargs:
         if Path(kwargs["python_source"]).is_dir():

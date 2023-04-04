@@ -1,4 +1,5 @@
 from pathlib import Path
+import shutil
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -37,6 +38,10 @@ def render_templates(**kwargs):
             (outdir / subdir).mkdir(exist_ok=True)
 
         p = outdir / rel
-        p = p.with_suffix(p.suffix.replace("_template", ""))
-        with open(p, "w") as f:
-            f.write(_render("/".join(rel.parts), **kwargs))
+
+        if p.suffix.endswith("_template"):
+            p = p.with_suffix(p.suffix.replace("_template", ""))
+            with open(p, "w") as f:
+                f.write(_render("/".join(rel.parts), **kwargs))
+        else:
+            shutil.copyfile(TEMPLATES / "/".join(rel.parts), str(p))

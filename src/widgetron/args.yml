@@ -66,6 +66,15 @@ icon:
             osx: .icns
             linux: .png
 
+window_style:
+    flag: "-window_style"
+    help: |
+        (Windows only) Set the WindowStyle for powershell.
+    options:
+        - Hidden
+        - Normal
+        - Minimized
+
 # CONSTRUCTOR_PARAMS
 company:
     flag: "-company"

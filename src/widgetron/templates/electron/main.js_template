@@ -52,7 +52,7 @@ app.on('web-contents-created', (event, contents) => {
 
 app.whenReady().then(() => {
   let opts = {
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

@@ -90,7 +90,7 @@ window_style:
     flag: "-window_style"
     help: |
         (Windows only) Set the WindowStyle for powershell.
-    default: Hidden
+    default: Minimized
     choices:
         - Hidden
         - Normal

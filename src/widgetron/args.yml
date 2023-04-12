@@ -151,3 +151,36 @@ nsis_template:
         If nsis_template is not provided, constructor uses its default NSIS template.
         For more complete customization for the installation experience, provide
         an NSIS template file. (Windows only)
+
+default_prefix:
+    flag: "-default_prefix"
+    help: |
+        You probably want to use default_prefix_domain_user instead.
+        The following description from the constructor repo does not reflect the
+        actual behavior, in that, selecting "Just Me" does not populate the install
+        location with the string provided here. I'm not sure what exactly it does.
+
+        Set default install prefix. On Linux, if not provided, the default prefix
+        is ${HOME}/${NAME}. On windows, this is used only for "Just Me" installation;
+        for "All Users" installation, use the default_prefix_all_users key.
+        If not provided, the default prefix is ${USERPROFILE}\${NAME}.
+
+default_prefix_domain_user:
+    flag: "-default_prefix_domain_user"
+    help: |
+        Set default installation prefix for domain user. If not provided, the
+        installation prefix for domain user will be ${LOCALAPPDATA}\${NAME}.
+        By default, it is different from the default_prefix value to avoid
+        installing the distribution in the roaming profile. Windows only.
+
+default_prefix_all_users:
+    flag: "-default_prefix_all_users"
+    help: |
+        You probably want to use default_prefix_domain_user instead.
+        I would not recomend advising users to install your app for "All Users"
+        as this is not tested, but that is the senario in which this parameter
+        is used (i.e. when the app is being installed for all users).
+
+        Set default installation prefix for All Users installation.
+        If not provided, the installation prefix for all users installation
+        will be ${ALLUSERSPROFILE}\${NAME}. Windows only.

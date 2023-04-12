@@ -9,6 +9,12 @@ from zipfile import ZipFile
 HERE = Path(__file__).parent
 os.chdir(str(HERE))
 
+# Help Jupyter ignore other .jupyter config paths
+os.environ["JUPYTER_PREFER_ENVIRONMENT_OVER_USER"] = "1"
+
+# This setting appears to ignore explicit --config option as well
+# os.environ["JUPYTER_NO_CONFIG"] = "1"
+
 SYS = platform.uname().system
 if SYS == "Windows":
     for z in HERE.glob("*.zip"):

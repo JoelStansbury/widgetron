@@ -5,6 +5,6 @@ environment_yaml = "environment.yaml"
 server_command = ["jupyter", "lab", "--no-browser"]
 version = "0.1.0"
 license_file = "LICENSE"
-installer_filename = "name.exe"
+installer_filename = "Minesweeper_Installer.exe"
 welcome_image = "assets/welcome_image.png"
 header_image_text = "header text"

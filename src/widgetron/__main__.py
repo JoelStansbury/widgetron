@@ -32,7 +32,7 @@ WIN = platform.system() == "Windows"
 LINUX = platform.system() == "Linux"
 OSX = platform.system() == "Darwin"
 
-CONDA_BUILD = "conda-mambabuild {} -c https://conda.anaconda.org/conda-forge"
+CONDA_BUILD = "conda-mambabuild {} -c https://conda.anaconda.org/conda-forge --no-test --no-verify"
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
 
 if WIN:
@@ -58,6 +58,9 @@ CONSTRUCTOR_PARAMS = {
     "welcome_image_text": str,
     "header_image_text": str,
     "nsis_template": lambda x:Path(x).absolute(),
+    "default_prefix": str,
+    "default_prefix_domain_user": str,
+    "default_prefix_all_users": str
 }
 
 def parse_arguments():
@@ -110,8 +113,9 @@ def parse_arguments():
 
 def copy_source_code(kwargs):
     # Copy python source into template package
+    # notebook dir already exists due to debug notebook
     dest = kwargs["temp_files"] / "server/widgetron_app/notebooks"
-    dest.mkdir()
+    # TODO: alter dest if kwargs["notebook"] is a directory
 
     if "python_source" in kwargs:
         if Path(kwargs["python_source"]).is_dir():

@@ -56,7 +56,7 @@ def main():
     if SYS == "Darwin":
         UI = ["open", "-W", str(HERE.absolute() / "widgetron.app"), "--env", f"widgetron_url={url}"]
     if SYS == "Linux":
-        UI = [str(next(HERE.rglob("widgetron")).absolute()), "--no-sandbox"]
+        UI = [str(next(HERE.rglob("widgetron")).absolute())]
     if SYS == "Windows":
         UI = str(next(HERE.rglob("widgetron.exe")).absolute())
     

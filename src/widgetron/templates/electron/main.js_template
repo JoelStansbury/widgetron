@@ -4,6 +4,9 @@ const config = new Config()
 
 url = process.env.widgetron_url;
 
+// https://www.electronjs.org/docs/latest/tutorial/sandbox#enabling-the-sandbox-globally
+app.enableSandbox();  // Force sandboxing
+
 app.whenReady().then(() => {
   let opts = {
     autoHideMenuBar: true

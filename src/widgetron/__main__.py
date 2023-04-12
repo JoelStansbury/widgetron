@@ -89,6 +89,14 @@ def parse_arguments():
     if isinstance(kwargs["server_command"], str):
         kwargs["server_command"]=kwargs["server_command"].strip().split()
 
+    kwargs["url_whitelist"] = kwargs.get("url_whitelist", [])
+    if isinstance(kwargs["url_whitelist"], str):
+        kwargs["url_whitelist"]=kwargs["url_whitelist"].strip().split()
+
+    kwargs["domain_whitelist"] = kwargs.get("domain_whitelist", [])
+    if isinstance(kwargs["domain_whitelist"], str):
+        kwargs["domain_whitelist"]=kwargs["domain_whitelist"].strip().split()
+
     assert isinstance(kwargs["server_command"], list)
     assert "version" in kwargs
 

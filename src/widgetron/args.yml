@@ -66,6 +66,26 @@ icon:
             osx: .icns
             linux: .png
 
+url_whitelist:
+    flag: "-url_whitelist"
+    nargs: "+"
+    help: |
+        By default external links do nothing. This is for better security.
+        If a url has been whitelisted, then clicking on it will open the url
+        in the user's default web-browser.
+        Alternatively, you may want to whitelist an entire domain via the
+        domain_whitelist argument.
+
+domain_whitelist:
+    flag: "-domain_whitelist"
+    nargs: "+"
+    help: |
+        By default external links do nothing. This is for better security.
+        If a domain has been whitelisted, then clicking on a url with that domain
+        will open the url in the user's default web-browser.
+        Alternatively, you may want to whitelist specific urls via the
+        url_whitelist argument.
+
 window_style:
     flag: "-window_style"
     help: |

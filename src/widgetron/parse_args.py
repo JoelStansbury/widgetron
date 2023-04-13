@@ -58,7 +58,7 @@ def config():
 
     # Load config file options (setup.cfg)
     res = config_file()
-    
+
     #  If outdir was specified in the config file, then it is relative to the config file
     if "outdir" in res:
         res["outdir"] = Path(res["outdir"]).absolute()
@@ -71,6 +71,7 @@ def config():
 
     # Override config and defaults with cli args
     res.update({k: v for k, v in kwargs.__dict__.items() if v is not None})
+    res["outdir"].mkdir(exist_ok=True)
 
     return res
 

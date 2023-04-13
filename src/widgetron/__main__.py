@@ -67,10 +67,6 @@ def parse_arguments():
     kwargs = CONFIG
     kwargs["dependencies"] = kwargs.get("dependencies", [])
     kwargs["channels"] = kwargs.get("channels", ["https://conda.anaconda.org/conda-forge"])
-    outdir = Path(kwargs['outdir'])
-    outdir.mkdir(exist_ok=True)
-    kwargs['outdir'] = outdir.absolute()
-
 
     if isinstance(kwargs["dependencies"], str):
         kwargs["dependencies"]=kwargs["dependencies"].strip().split()

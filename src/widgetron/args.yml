@@ -13,7 +13,7 @@ outdir:
 
 notebook:
     flag: "-nb"
-    help: "Path to notebook to convert. (must be .ipynb)"
+    help: "Path to notebook to convert. (must be .ipynb or a directory)"
 
 version:
     flag: "-v"

@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder build"
+    "build": "electron-builder build",
+    "lock": "cyclonedx-npm"
   },
   "build": {
     "appId": "com.example.app",
@@ -22,6 +23,7 @@
     }
   },
   "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^1.9.2",
     "electron": "^22.3.1",
     "electron-builder": "^23.6.0"
   },

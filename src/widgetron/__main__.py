@@ -67,6 +67,10 @@ def parse_arguments():
     kwargs = CONFIG
     kwargs["dependencies"] = kwargs.get("dependencies", [])
     kwargs["channels"] = kwargs.get("channels", ["https://conda.anaconda.org/conda-forge"])
+    outdir = Path(kwargs['outdir'])
+    outdir.mkdir(exist_ok=True)
+    kwargs['outdir'] = outdir.absolute()
+
 
     if isinstance(kwargs["dependencies"], str):
         kwargs["dependencies"]=kwargs["dependencies"].strip().split()
@@ -79,6 +83,16 @@ def parse_arguments():
             while "@EXPLICIT" not in l:
                 l = f.readline()
             kwargs["dependencies"] += [s.strip() for s in f.readlines()]
+        cmd = [
+            "jake",
+            "sbom",
+            "-t=CONDA",
+            f"-f={kwargs['explicit_lock']}",
+            "--output-format=json",
+            f"-o={Path(kwargs['outdir'])/'conda-sbom.json'}"
+        ]
+        print(cmd)
+        call(cmd)
     elif "environment_yaml" in kwargs:
         with open(kwargs["environment_yaml"], "r") as f:
             _env = yaml.safe_load(f)
@@ -162,6 +176,14 @@ def package_electron_app(kwargs):
     shutil.copy(str(icon), f"build/icon{icon.suffix}")
 
     call("npm install .", shell=True)
+    sbom = Path(kwargs['outdir']) / 'npm-sbom.json'
+    cmd = [
+        "npm", "run", "lock", "--",
+        "--output-format", "json",
+        "--output-file", f"{sbom}"
+    ]
+    print(cmd)
+    call(cmd, shell=True)
     call(
         "npm run build",
         shell=True,

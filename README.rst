@@ -39,55 +39,30 @@ How it Works
    -  Conda dependencies are specified with the ``-deps`` parameter (see
       example).
 
-Help
-----
-
-::
-
-   usage: widgetron [-h] [-o OUTDIR] [-nb NOTEBOOK] [-v VERSION]
-                  [-env ENVIRONMENT_YAML]
-                  [-deps DEPENDENCIES [DEPENDENCIES ...]]
-                  [-c CHANNELS [CHANNELS ...]] [-src PYTHON_SOURCE_DIR]
-                  [-sc SERVER_COMMAND [SERVER_COMMAND ...]] [-icon ICON]
-                  [directory]
-
-   Creates an app for displaying the output cells of an interactive notebook.
-
-   positional arguments:
-   directory             Directory to build in. This is also where the utility
-                           will search for relevant config files (i.e.
-                           `environment.yml`, `setup.cfg`, `pyproject.toml`)
-
-   options:
-   -h, --help            show this help message and exit
-   -o OUTDIR, --outdir OUTDIR
-                           Where to put the installer.
-   -nb NOTEBOOK, --notebook NOTEBOOK
-                           Path to notebook to convert. (must be .ipynb)
-   -v VERSION, --version VERSION
-                           Version number.
-   -env ENVIRONMENT_YAML, --environment_yaml ENVIRONMENT_YAML
-                           Path to environment.yml
-   -deps DEPENDENCIES [DEPENDENCIES ...], --dependencies DEPENDENCIES [DEPENDENCIES ...]
-                           List of conda-forge packages required to run the widget (pip packages are not
-                           supported). If environment_yaml or explicit_lock are also provided, then those
-                           are appended to the list of dependencies.
-   -c CHANNELS [CHANNELS ...], --channels CHANNELS [CHANNELS ...]
-                           List of conda channels required to find specified packages. Order is obeyed,
-                           'local' is always checked first. Default=['conda-forge',]. If environment_yaml or
-                           explicit_lock are also provided, then those are appended to the list of channels.
-   -lock EXPLICIT_LOCK, --explicit_lock EXPLICIT_LOCK
-                           Path to lock file generated via `conda-lock --kind=explicit`.
-   -src PYTHON_SOURCE, --python_source PYTHON_SOURCE
-                           This is a shortcut to avoid needing to build a conda package for your source
-                           code. Widgetron is basically a big jinja template, if your notebook has `from
-                           my_package import my_widget` then you would pass C:/path/to/my_package, and the
-                           directory will by copied recursively into a package shell immediately next to the
-                           notebook.
-   -sc SERVER_COMMAND [SERVER_COMMAND ...], --server_command SERVER_COMMAND [SERVER_COMMAND ...]
-                           How to launch JupyterLab. Default `["jupyter", "lab", "--no-browser"]`
-   -icon ICON, --icon ICON
-                           256 by 256 icon file (must be appropriate to OS) win: .ico osx: .icns linux: .png
+Development Guide
+-----------------
+Before you run ``widgetron``
+1. Create a conda environment yaml to define your dependencies
+   - pip dependencies are not supported
+2. If you want to create a Software Bill of Materials (SBOM), then you'll need to also lock this environment
+   and provide the lockfile to the ``explicit_lock`` parameter.
+3. Create a ``pyproject.toml`` or ``setup.cfg`` and follow the examples to see
+   how these should be formatted.
+4. If you have additional source code to include there are two options for how to do so
+   - (Recommended) create a conda package (using ``conda-build``) and add it to the ``-deps`` argument.
+   - (Easy, and dangerous) Include the raw source files
+      - If your ``--notebook`` argument is a single notebook, then point the ``-src`` parameter to the root of your python module.
+      - If your ``--notebook`` argument is a directory, then your source code must be placed inside this directory and be relatively importable.
+      - __Warning__: this includes __EVERYTHING__ so delete your ``__pycache__``s and ``.env``s etc.
+         You probably shouldn't use this for anything you intend to distribute.
+4. Provide any metadata you want (see ``widgetron -h`` or ``src/widgetron/args.yml`` for options)
+5. run ``widgetron`` in the same directory as the ``toml`` or ``cfg`` file
+   - This will immediately render all of the templates so you can inspect them in a new ``widgetron_temp_files`` directory.
+   - I recommend looking at ``constructor/construct.yaml`` and ``server/widgetron_app/notebooks`` especially.
+   - If something is obviously wrong, stop widgetron and fix it.
+   - Otherwise, wait for the installer to be created, then run it and make sure everything works.
+   - If you get some import errors, then there's likely something missing from the environment.yml/lock
+   - There's also a debug notebook that you can run to get some useful info about how jupyterlab is running.
 
 Example Usage
 -------------

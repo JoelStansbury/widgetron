@@ -79,6 +79,16 @@ def parse_arguments():
             while "@EXPLICIT" not in l:
                 l = f.readline()
             kwargs["dependencies"] += [s.strip() for s in f.readlines()]
+        cmd = [
+            "jake",
+            "sbom",
+            "-t=CONDA",
+            f"-f={kwargs['explicit_lock']}",
+            "--output-format=json",
+            f"-o={Path(kwargs['outdir'])/'conda-sbom.json'}"
+        ]
+        print(cmd)
+        call(cmd)
     elif "environment_yaml" in kwargs:
         with open(kwargs["environment_yaml"], "r") as f:
             _env = yaml.safe_load(f)
@@ -88,6 +98,14 @@ def parse_arguments():
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
     if isinstance(kwargs["server_command"], str):
         kwargs["server_command"]=kwargs["server_command"].strip().split()
+
+    kwargs["url_whitelist"] = kwargs.get("url_whitelist", [])
+    if isinstance(kwargs["url_whitelist"], str):
+        kwargs["url_whitelist"]=kwargs["url_whitelist"].strip().split()
+
+    kwargs["domain_whitelist"] = kwargs.get("domain_whitelist", [])
+    if isinstance(kwargs["domain_whitelist"], str):
+        kwargs["domain_whitelist"]=kwargs["domain_whitelist"].strip().split()
 
     assert isinstance(kwargs["server_command"], list)
     assert "version" in kwargs
@@ -154,6 +172,14 @@ def package_electron_app(kwargs):
     shutil.copy(str(icon), f"build/icon{icon.suffix}")
 
     call("npm install .", shell=True)
+    sbom = Path(kwargs['outdir']) / 'npm-sbom.json'
+    cmd = [
+        "npm", "run", "lock", "--",
+        "--output-format", "json",
+        "--output-file", f"{sbom}"
+    ]
+    print(cmd)
+    call(cmd, shell=True)
     call(
         "npm run build",
         shell=True,

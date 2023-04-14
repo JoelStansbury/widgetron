@@ -1,17 +1,70 @@
 const { app, BrowserWindow } = require('electron')
 const Config = require('electron-store')
 const config = new Config()
+const { shell } = require('electron')
 
 url = process.env.widgetron_url;
+url_whitelist = [
+{%- for url in url_whitelist %}
+  "{{url}}",
+{%- endfor %}
+]
+domain_whitelist = [
+{%- for domain in domain_whitelist %}
+  "{{domain}}",
+{%- endfor %}
+]
+
+
+// https://www.electronjs.org/docs/latest/tutorial/sandbox#enabling-the-sandbox-globally
+app.enableSandbox();  // Force sandboxing
+
+app.on('web-contents-created', (event, contents) => {
+  
+  // https://www.electronjs.org/docs/latest/tutorial/security#12-verify-webview-options-before-creation
+  contents.on('will-attach-webview', (event, webPreferences, params) => {
+    // Strip away preload scripts
+    delete webPreferences.preload
+    // Disable Node.js integration
+    webPreferences.nodeIntegration = false
+  })
+
+  // https://www.electronjs.org/docs/latest/tutorial/security#13-disable-or-limit-navigation
+  // disable navigation
+  contents.on('will-navigate', (event, navigationUrl) => {
+    console.log(`Denying navigation to ${navigationUrl}`)
+    event.preventDefault()
+  })
+
+  // https://www.electronjs.org/docs/latest/tutorial/security#14-disable-or-limit-creation-of-new-windows
+  // disable creation of new windows
+  contents.setWindowOpenHandler(({ url }) => {
+    if (url_whitelist.includes(url) || domain_whitelist.includes((new URL(url)).hostname)) {
+      // Open url in the default browser instead
+      // This is safer than a new electron window
+      shell.openExternal(url)
+    } else {
+      console.log(`Blocking navigation to "${url}" as it has not been whitelisted.`)
+    }
+    return { action: 'deny' }
+  })
+});
 
 app.whenReady().then(() => {
   let opts = {
-    autoHideMenuBar: true
+    autoHideMenuBar: true,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      webSecurity: true,
+    }
   }
-  const win = new BrowserWindow(opts)
+  const win = new BrowserWindow(opts);
   
   win.setBounds(config.get('winBounds'))
-  win.loadURL(url);
+  if (url.startsWith("http://localhost:")) {
+    win.loadURL(url);
+  }
 
   win.on('close', function(e) {
     config.set('winBounds', win.getBounds())

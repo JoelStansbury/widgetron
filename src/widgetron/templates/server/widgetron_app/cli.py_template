@@ -1,17 +1,17 @@
-import subprocess
-from pathlib import Path
-import platform
 import os
-import re
+import platform
 import psutil
-from zipfile import ZipFile
+import re
+import subprocess
 import threading
+from pathlib import Path
 from shutil import which
-import asyncio
+from zipfile import ZipFile
 
-
+FILENAME = "{{ filename }}"
+COMMAND = '{{ server_executable }}'
+ARGS = [{% for part in server_command_args %}'{{part}}',{% endfor %}]
 HERE = Path(__file__).parent
-
 
 os.chdir(str(HERE))
 #: Help Jupyter ignore other .jupyter config paths
@@ -29,31 +29,14 @@ else:
         subprocess.call(["unzip", str(z)])
         z.unlink()
 
-FILENAME = "{{ filename }}"
-COMMAND = '{{ server_executable }}'
-ARGS = [{% for part in server_command_args %}'{{part}}',{% endfor %}]
-
-def redirect_output(server, stop_event:threading.Event):
-    """
-    For debugging it is helpful to see any errors that jupyter prints out.
-    This function will redirect them to the main stdout.
-    """
-    while not stop_event.is_set():
-        try:
-            l = asyncio.run(
-                asyncio.wait_for(
-                    asyncio.to_thread(server.stderr.readline),
-                    0.1,
-                )
-            )
-            print(str(l).strip())
-        except TimeoutError:
-            pass
-    print("Shutting Down Server")
+def redirect_output(server):
+    while True:
+        print(str(server.stderr.readline()).strip())
 
 class Server:
     def __init__(self):
-        #: Path is not passed to popen if shell=False on windows
+        # Path is not passed to popen if shell=False on windows, so it is
+        # necessary to use the full path to the jupyter command.
         command = which(COMMAND)
         self.server = subprocess.Popen(
             [command, *ARGS,],
@@ -67,14 +50,13 @@ class Server:
         self.wait_for_server(self.server)
 
         # Redirect jupyter server output for debugging purposes
-        # self.stop_event = threading.Event()
-        # threading.Thread(
-        #     target=redirect_output,
-        #     args=(self.server, self.stop_event),
-        # ).start()
+        threading.Thread(
+            target=redirect_output,
+            args=(self.server,),
+            daemon=True,
+        ).start()
         
     def stop(self):
-        # self.stop_event.set()
         for proc in self.process.children(recursive=True):
             proc.kill()
         self.process.kill()

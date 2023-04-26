@@ -5,15 +5,19 @@ import os
 import re
 import psutil
 from zipfile import ZipFile
+import threading
+from shutil import which
+import asyncio
+
 
 HERE = Path(__file__).parent
+
+
 os.chdir(str(HERE))
-
-# Help Jupyter ignore other .jupyter config paths
+#: Help Jupyter ignore other .jupyter config paths
 os.environ["JUPYTER_PREFER_ENVIRONMENT_OVER_USER"] = "1"
-
-# This setting appears to ignore explicit --config option as well
-# os.environ["JUPYTER_NO_CONFIG"] = "1"
+#: Silence warning about frozen modules
+os.environ["PYDEVD_DISABLE_FILE_VALIDATION"]="1"
 
 SYS = platform.uname().system
 if SYS == "Windows":
@@ -25,47 +29,82 @@ else:
         subprocess.call(["unzip", str(z)])
         z.unlink()
 
+FILENAME = "{{ filename }}"
+COMMAND = '{{ server_executable }}'
+ARGS = [{% for part in server_command_args %}'{{part}}',{% endfor %}]
+
+def redirect_output(server, stop_event:threading.Event):
+    """
+    For debugging it is helpful to see any errors that jupyter prints out.
+    This function will redirect them to the main stdout.
+    """
+    while not stop_event.is_set():
+        try:
+            l = asyncio.run(
+                asyncio.wait_for(
+                    asyncio.to_thread(server.stderr.readline),
+                    0.1,
+                )
+            )
+            print(str(l).strip())
+        except TimeoutError:
+            pass
+    print("Shutting Down Server")
+
+class Server:
+    def __init__(self):
+        #: Path is not passed to popen if shell=False on windows
+        command = which(COMMAND)
+        self.server = subprocess.Popen(
+            [command, *ARGS,],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        self.process = psutil.Process(self.server.pid)
+        self.url = None
+        self.stopped = False
+        self.wait_for_server(self.server)
+
+        # Redirect jupyter server output for debugging purposes
+        # self.stop_event = threading.Event()
+        # threading.Thread(
+        #     target=redirect_output,
+        #     args=(self.server, self.stop_event),
+        # ).start()
+        
+    def stop(self):
+        # self.stop_event.set()
+        for proc in self.process.children(recursive=True):
+            proc.kill()
+        self.process.kill()
+
+    def wait_for_server(self, server):
+        l = str(server.stderr.readline()).strip()
+        while not "http://localhost:" in l:
+            if l:
+                print(l)
+                l = str(server.stderr.readline()).strip()
+        
+        self.url = re.findall("http://localhost:[a-z0-9:?/=]*", l)[0].strip()
+        self.token = self.url.split("token=")[1]
+        self.port = self.url.split("localhost:")[1].split("/lab")[0]
+
 def main():
     os.chdir("notebooks")
 
-    # launch server in background
-    server = subprocess.Popen(
-        [{% for part in server_command %}'{{part}}',{% endfor %}],
-        shell= (SYS == "Windows"),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+    server = Server()
 
-    # Wait for server to start
-    l = str(server.stderr.readline())
-    while "http://localhost:" not in l:
-        if l != "b''":
-            print(l)
-        l = str(server.stderr.readline())
-
-    # Read the output from jupyter lab and parse out the url
-    url = re.findall("http://localhost:[a-z0-9:?/=]*", l)[0].strip()
-    token = url.split("token=")[1]
-    port = url.split("localhost:")[1].split("/lab")[0]
-    fname = "{{ filename }}"
-    url = f"http://localhost:{port}/lab/tree/{fname}?token={token}"
-    print(url)
+    url = f"http://localhost:{server.port}/lab/tree/{FILENAME}?token={server.token}"
     os.environ["widgetron_url"] = url
 
     # open UI
     if SYS == "Darwin":
         UI = ["open", "-W", str(HERE.absolute() / "widgetron.app"), "--env", f"widgetron_url={url}"]
     if SYS == "Linux":
-        UI = [str(next(HERE.rglob("widgetron")).absolute())]
+        UI = str(next(HERE.rglob("widgetron")).absolute())
     if SYS == "Windows":
         UI = str(next(HERE.rglob("widgetron.exe")).absolute())
     
     subprocess.call(UI)
-
-    # when UI stops, kill jupyter lab
-    def kill(proc_pid):
-        process = psutil.Process(proc_pid)
-        for proc in process.children(recursive=True):
-            proc.kill()
-        process.kill()
-    kill(server.pid)
+    server.stop()

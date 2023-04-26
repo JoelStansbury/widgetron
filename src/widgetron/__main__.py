@@ -5,7 +5,7 @@ import shutil
 import sys
 import zipfile
 from pathlib import Path
-from subprocess import call
+from subprocess import check_call
 
 import yaml
 
@@ -88,7 +88,7 @@ def parse_arguments():
             f"-o={Path(kwargs['outdir'])/'conda-sbom.json'}"
         ]
         print(cmd)
-        call(cmd)
+        check_call(cmd)
     elif "environment_yaml" in kwargs:
         with open(kwargs["environment_yaml"], "r") as f:
             _env = yaml.safe_load(f)
@@ -98,6 +98,16 @@ def parse_arguments():
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
     if isinstance(kwargs["server_command"], str):
         kwargs["server_command"]=kwargs["server_command"].strip().split()
+    if kwargs["server_command"][0] == "jupyter": # "jupyter lab"
+        kwargs["server_executable"] = '-'.join(kwargs["server_command"][:2])
+        kwargs["server_command_args"] = kwargs["server_command"][2:]
+    elif 'jupyter-' in kwargs["server_command"]:
+        kwargs["server_executable"] = kwargs["server_command"][0]
+        kwargs["server_command_args"] = kwargs["server_command"][1:]
+    else:
+        raise ValueError(
+            "server command did not follow expected syntax ('jupyter-cmd' or 'jupyter cmd')"
+        )
 
     kwargs["url_whitelist"] = kwargs.get("url_whitelist", [])
     if isinstance(kwargs["url_whitelist"], str):
@@ -171,7 +181,7 @@ def package_electron_app(kwargs):
     # assert icon.suffix.lower() == ".png", "WIP: only png currently supported"
     shutil.copy(str(icon), f"build/icon{icon.suffix}")
 
-    call("npm install .", shell=True)
+    check_call("npm install .", shell=True)
     sbom = Path(kwargs['outdir']) / 'npm-sbom.json'
     cmd = [
         "npm", "run", "lock", "--",
@@ -179,8 +189,8 @@ def package_electron_app(kwargs):
         "--output-file", f"{sbom}"
     ]
     print(cmd)
-    call(cmd, shell=True)
-    call(
+    check_call(cmd, shell=True)
+    check_call(
         "npm run build",
         shell=True,
     )
@@ -214,12 +224,12 @@ def copy_icon(kwargs):
 
 def build_conda_package(kwargs):
     dir = kwargs["temp_files"] / "recipe"
-    call(CONDA_BUILD.format(dir), shell=True)
+    check_call(CONDA_BUILD.format(dir), shell=True)
 
 
 def build_installer(kwargs):
     dir = kwargs["temp_files"] / "constructor"
-    call(f"constructor {dir} --output-dir {kwargs['outdir']}", shell=True)
+    check_call(f"constructor {dir} --output-dir {kwargs['outdir']}", shell=True)
 
 
 def cli():

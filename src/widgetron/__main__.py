@@ -98,10 +98,12 @@ def parse_arguments():
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
     if isinstance(kwargs["server_command"], str):
         kwargs["server_command"]=kwargs["server_command"].strip().split()
-    if kwargs["server_command"][0] == "jupyter": # "jupyter lab"
+
+    # cli.py template requires executable and cli args to be separated.
+    if kwargs["server_command"][0] == "jupyter":  # "jupyter lab"
         kwargs["server_executable"] = '-'.join(kwargs["server_command"][:2])
         kwargs["server_command_args"] = kwargs["server_command"][2:]
-    elif 'jupyter-' in kwargs["server_command"]:
+    elif 'jupyter-' in kwargs["server_command"][0]:  # "jupyter-lab"
         kwargs["server_executable"] = kwargs["server_command"][0]
         kwargs["server_command_args"] = kwargs["server_command"][1:]
     else:

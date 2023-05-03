@@ -68,7 +68,6 @@ def config():
         if k not in res:
             res[k] = v
 
-
     # Override config and defaults with cli args
     res.update({k: v for k, v in kwargs.__dict__.items() if v is not None})
     res["outdir"].mkdir(exist_ok=True)

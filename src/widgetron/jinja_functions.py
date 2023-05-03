@@ -26,7 +26,7 @@ def render_templates(**kwargs):
     provided in kwargs.
     """
     outdir = kwargs["temp_files"]
-    outdir.mkdir()
+    outdir.mkdir(exist_ok=True)
 
     for f in TEMPLATES.rglob("*.*"):
         rel = f.relative_to(TEMPLATES)

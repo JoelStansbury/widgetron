@@ -19,10 +19,18 @@ version:
     flag: "-v"
     help: "Version number."
 
-environment_yaml:
-    flag: "-env"
+environment_file:
+    flag: "-environment_file"
     help: "Path to environment.yml"
-    
+
+environment:
+    flag: "-environment"
+    help: "Path to pre-built environment."
+
+pkg_output_dir:
+    flag: "--pkg_output_dir"
+    help: "Where to place intermediate conda packages."
+
 dependencies:
     flag: "-deps"
     nargs: "+"

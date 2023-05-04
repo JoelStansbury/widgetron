@@ -1,8 +1,9 @@
 name: {{name_nospace}}
 version: {{version}}
 channels:
-  - local{% for c in channels %}
-  - {{c}}{% endfor %}
+{%- for c in channels %}
+  - {{c}}
+{%- endfor %}
 specs:
   - conda
   - python

@@ -14,38 +14,34 @@ widgetron -h
 ### How it Works
 
 1. Builds and packages a minimal electron interface to navigate to
-   `localhost:8866` and boot up the `jupyter lab` server
-2. Copies a notebook (specified by `-f`) into a template python
-   package
+   `localhost:8866` and boot up the `jupyter lab` server.
+2. Copies a notebook or directory of notebooks (specified by `-nb`) into a
+   template python package.
 3. Copies the entire contents of the built electron application into the
    template python package.
-4. Optionally copies a source code directory (specified by `-src`), if
-   provided, into the template python package.
-
-   -  The package specifies `**` for package_data so be sure to clean
-      out any `__pycache__` folders and other garbage.
-   -  Must be a valid python package (i.e. the folder must contain
-      `__init__.py`)
-
-5. Makes a conda-package out of the python package template to hold the
-   notebook, electron app, and source code if provided.
-6. Builds an installer
-
-   -  Conda dependencies are specified with the `-deps` parameter (see
-      example).
+4. Makes a conda-package out of the python package template to hold the
+   notebook and packaged electron app.
+5. Builds an installer using conda/constructor.
 
 ### Development Guide
 Before you run `widgetron`
-1. Create a conda environment yaml to define your dependencies
+1. Conda dependencies are specified using one of the following paradigms. (pip dependencies are ignored)
 
-   - pip dependencies are not supported
+   - `dependencies` and `channels`. 2 lists of strings identifying which packages
+      to search for and which channels are searched.
+      e.g. `widgetron . -nb my_notebook.ipynb --dependencies numpy matplotlib --channels conda-forge`
+      `jupyterlab`, `conda`, and `menuinst` (if Windows) are included by default.
+   - `environment`. Pre-built conda environment which must contain `jupyterlab`
+      `conda` and `menuinst` (if Windows).
+   - `explicit_lock`. Lockfile representing the exact package urls to be included
+      in the environment. This env will be built within the widgetron work directory
+      and the installer will be built from that env. This option allows the
+      creatioin of a Software Bill of Materials (SBOM) for the conda packages.
 
-2. If you want to create a Software Bill of Materials (SBOM), then you'll need to also lock this environment
-   and provide the lockfile to the `explicit_lock` parameter.
-
-3. Create a `pyproject.toml` or `setup.cfg` and follow the examples to see
+2. Create a `pyproject.toml` or `setup.cfg` and follow the examples to see
    how these should be formatted.
-4. If you have additional source code to include there are two options for how to do so
+
+3. If you have additional source code to include there are two options for how to do so
 
    - (Recommended) create a conda package (using `conda-build`) and add it to the `-deps` argument.
    - (Easy, and dangerous) Include the raw source files

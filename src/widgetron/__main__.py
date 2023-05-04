@@ -64,7 +64,6 @@ CONSTRUCTOR_PARAMS = {
     "default_prefix_domain_user": str,
     "default_prefix_all_users": str,
     "environment": lambda x: Path(x).absolute(),
-    "environment_file": lambda x: Path(x).absolute(),
 }
 
 

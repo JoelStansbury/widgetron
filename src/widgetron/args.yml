@@ -19,13 +19,16 @@ version:
     flag: "-v"
     help: "Version number."
 
-environment_file:
-    flag: "-environment_file"
-    help: "Path to environment.yml"
-
 environment:
     flag: "-environment"
-    help: "Path to pre-built environment."
+    help: |
+        Path to pre-built environment.
+        If provided, the dependencies argument is ignored.
+        If provided, the channels argument is ignored.
+        The widgetron_app package will be installed to this environment and the
+        installer will build directly from this env.
+        This option is useful for debugging as you can test it with...
+        `conda activate {environment} && python -m widgetron_app`
 
 pkg_output_dir:
     flag: "--pkg_output_dir"
@@ -52,6 +55,14 @@ explicit_lock:
     flag: "-lock"
     help: |
         Path to lock file generated via `conda-lock --kind=explicit`.
+        If provided, the dependencies argument is ignored.
+        If provided, the channels argument is ignored.
+        Widgetron will build the environment using
+        `conda create --file {explicit_lock} --prefix widgetron_temp_files/.env`
+        The widgetron_app package will be installed to this environment and the
+        installer will build directly from this env.
+        This option is useful for debugging as you can test it with...
+        `conda activate widgetron_temp_files/.env && python -m widgetron_app`
 
 python_source:
     flag: "-src"

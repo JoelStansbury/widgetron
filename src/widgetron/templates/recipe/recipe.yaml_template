@@ -1,0 +1,21 @@
+package:
+  name: widgetron_app
+  version: 0.0.1
+
+source:
+  url: '{{ environ.SDIST_URL }}'
+  sha256: '{{ environ.SDIST_SHA256 }}'
+build:
+  string: 'py<< python_version.replace(".", "") >>_{{ environ.SDIST_SHA256[:7] }}'
+  ignore_prefix_files:
+    - Lib/site-packages/widgetron_app/*.zip
+
+
+requirements:
+  host:
+    - flit-core >=3.9.0,<4
+    - pip
+    - python =<< python_version >>.*
+  run:
+    - python =<< python_version >>.*
+    - flit >=3.9.0, <4

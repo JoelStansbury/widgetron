@@ -1,0 +1,26 @@
+[build-system]
+build-backend = "flit_core.buildapi"
+requires = [
+  "flit_core >=3.9.0,<4",
+]
+
+
+[project]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+#   "License :: Other/Proprietary License", # TODO
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python",
+]
+dependencies = [
+]
+description = "Package for launching jupyterlab server and opening widgetron frontend."
+license = {file = "LICENSE.txt"}
+name = "widgetron_app"
+readme = "README.md"
+version = "0.0.1"  # Do something with version

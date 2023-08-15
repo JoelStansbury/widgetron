@@ -2,13 +2,15 @@
   "name": "widgetron",
   "main": "main.js",
   "version": "0.1.0",
+  "description": "{{description}}",
+  "author": "{{author}}",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder build",
     "lock": "cyclonedx-npm"
   },
   "build": {
-    "appId": "com.example.app",
+    "appId": "{{appid}}",
     "win": {
       "icon": "build/icon.ico",
       "target": "dir"

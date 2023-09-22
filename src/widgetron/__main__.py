@@ -37,6 +37,8 @@ OSX = platform.system() == "Darwin"
 
 
 CONDA_BUILD = shutil.which("conda-mambabuild")
+NPM = shutil.which("npm")
+YARN = shutil.which("yarn")
 
 
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
@@ -93,7 +95,7 @@ def _is_installed(env, library):
 def _install_missing_pkgs(env, pkgs):
     CONDA = shutil.which("conda")
     check_call(
-        [CONDA, "install", "--prefix", str(env), "-y", *pkgs, "-c", "conda-forge"]
+        [CONDA, "install", "--prefix", str(env), "-y", *pkgs, "-c", "conda-forge"] + (["--no-shortcuts"] if WIN else [])
     )
 
 
@@ -260,21 +262,19 @@ def package_electron_app(kwargs):
     Path("build").mkdir(exist_ok=True)
     # assert icon.suffix.lower() == ".png", "WIP: only png currently supported"
     shutil.copy(str(icon), f"build/icon{icon.suffix}")
-    yarn = shutil.which("yarn")
-    npm = shutil.which("npm")
     
-    rc = call([yarn, "install"])
+    rc = call([YARN, "install"])
     if rc:
         raise ChildProcessError(f"Failed to install node packages {rc}")
-    rc = rc or call([yarn, "upgrade"])
+    rc = rc or call([YARN, "upgrade"])
     if rc:
         raise ChildProcessError(f"Failed to update node packages {rc}")
     sbom = Path(kwargs["outdir"]) / "npm-sbom.json"
-    rc = rc or call([yarn, "run", "build"])
+    rc = rc or call([YARN, "run", "build"])
     if rc:
         raise ChildProcessError(f"Failed to build electron app {rc}")
     cmd = [
-        npm,
+        NPM,  # Yarn lock complains about missing license for npm-ls
         "run",
         "lock",
         "--",
@@ -344,8 +344,8 @@ def build_conda_package(kwargs):
                 "widgetron_app",
                 "-c",
                 path_to_url(str(kwargs['pkg_output_dir'])),
-                "--force-reinstall",
             ] + (["--no-shortcuts"] if WIN else [])
+            + ["--force-reinstall"],
         )
         if rc:
             raise ChildProcessError(f"Failed to install widgetron server app. {rc}")

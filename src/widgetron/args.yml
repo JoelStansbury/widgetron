@@ -6,6 +6,10 @@ directory:
         Directory to build in. This is also where the utility will search for
         relevant config files (i.e. `environment.yml`, `setup.cfg`, `pyproject.toml`)
 
+python_version:
+    flag: "-py"
+    default: "auto"
+
 outdir:
     flag: "-o"
     default: "."

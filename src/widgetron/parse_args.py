@@ -3,7 +3,10 @@ import configparser
 import os
 from pathlib import Path
 
-import toml
+try:
+    import tomllib
+except:
+    import tomli as tomllib
 import yaml
 
 HERE = Path(__file__).parent
@@ -26,7 +29,7 @@ def config_file():
             return setup_cfg._sections["tool.widgetron"]
 
     if Path("pyproject.toml").is_file():
-        _toml = toml.load(Path("pyproject.toml"))
+        _toml = tomllib.load(Path("pyproject.toml").open('rb'))
         if "tool" in _toml:
             if "widgetron" in _toml["tool"]:
                 print("Initialize from pyproject.toml")

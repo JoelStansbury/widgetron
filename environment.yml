@@ -2,15 +2,14 @@ name: dev
 
 channels:
   - conda-forge
-  # - main  # Uncomment if using osx-arm64 install of python
 
 dependencies:
   - python <=3.11
-  - constructor >=3.3, <3.4
+  - constructor >=3.3, <4
   - boa
   - nodejs >18, <19
+  - yarn >=1, <2
   - jupyterlab >3, <4
-  - toml
   - yaml
   - black
   - isort

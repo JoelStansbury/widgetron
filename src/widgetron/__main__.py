@@ -6,7 +6,8 @@ import shutil
 import sys
 import zipfile
 from pathlib import Path
-from subprocess import check_call, Popen, PIPE
+from subprocess import call, check_call, Popen, PIPE
+from conda.common.url import path_to_url
 
 import yaml
 
@@ -34,7 +35,10 @@ WIN = platform.system() == "Windows"
 LINUX = platform.system() == "Linux"
 OSX = platform.system() == "Darwin"
 
-CONDA_BUILD = "conda-mambabuild {} -c https://conda.anaconda.org/conda-forge --no-test --no-verify --output-folder {}"
+
+CONDA_BUILD = shutil.which("conda-mambabuild")
+
+
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
 
 if WIN:
@@ -99,6 +103,9 @@ def parse_arguments():
     kwargs["channels"] = kwargs.get(
         "channels", ["https://conda.anaconda.org/conda-forge"]
     )
+
+    if kwargs['python_version'] == 'auto':
+        kwargs['python_version'] = ".".join(list(map(str, sys.version_info[:2])))
 
     if isinstance(kwargs["dependencies"], str):
         kwargs["dependencies"] = kwargs["dependencies"].strip().split()
@@ -205,7 +212,7 @@ def parse_arguments():
         ).absolute()
     else:
         kwargs["pkg_output_dir"] = Path(kwargs["pkg_output_dir"]).absolute()
-    kwargs["channels"].append(f"file:///{kwargs['pkg_output_dir']}")
+    kwargs["channels"] = [path_to_url(str(kwargs['pkg_output_dir']))] + kwargs["channels"]
     return kwargs
 
 
@@ -253,15 +260,21 @@ def package_electron_app(kwargs):
     Path("build").mkdir(exist_ok=True)
     # assert icon.suffix.lower() == ".png", "WIP: only png currently supported"
     shutil.copy(str(icon), f"build/icon{icon.suffix}")
-
-    check_call("npm install .", shell=True)
+    yarn = shutil.which("yarn")
+    npm = shutil.which("npm")
+    
+    rc = call([yarn, "install"])
+    if rc:
+        raise ChildProcessError(f"Failed to install node packages {rc}")
+    rc = rc or call([yarn, "upgrade"])
+    if rc:
+        raise ChildProcessError(f"Failed to update node packages {rc}")
     sbom = Path(kwargs["outdir"]) / "npm-sbom.json"
-    check_call(
-        "npm run build",
-        shell=True,
-    )
+    rc = rc or call([yarn, "run", "build"])
+    if rc:
+        raise ChildProcessError(f"Failed to build electron app {rc}")
     cmd = [
-        "npm",
+        npm,
         "run",
         "lock",
         "--",
@@ -270,7 +283,9 @@ def package_electron_app(kwargs):
         "--output-file",
         f"{sbom}",
     ]
-    check_call(cmd, shell=True)
+    rc = rc or call(cmd)
+    if rc:
+        raise ChildProcessError(f"Failed to create sbom for node modules. {rc}")
 
     if OSX or LINUX:
         dist = "dist"
@@ -302,9 +317,22 @@ def copy_icon(kwargs):
 
 def build_conda_package(kwargs):
     dir = kwargs["temp_files"] / "recipe"
-    check_call(CONDA_BUILD.format(dir, kwargs["pkg_output_dir"]), shell=True)
+    
+
+    rc = call(
+        [
+            CONDA_BUILD,
+            str(dir),
+            "-c=https://conda.anaconda.org/conda-forge",
+            "--no-test",
+            "--no-verify",
+            f"--output-folder={kwargs['pkg_output_dir']}"
+        ]
+    )
+    if rc:
+        raise ChildProcessError(f"Failed to build widgetron server app. {rc}")
     if "environment" in kwargs:
-        check_call(
+        rc = call(
             [
                 "conda",
                 "run",
@@ -315,16 +343,20 @@ def build_conda_package(kwargs):
                 "-y",
                 "widgetron_app",
                 "-c",
-                f"file:///{Path(kwargs['pkg_output_dir']).absolute()}",
-                "--no-shortcuts",
+                path_to_url(str(kwargs['pkg_output_dir'])),
                 "--force-reinstall",
-            ]
+            ] + (["--no-shortcuts"] if WIN else [])
         )
+        if rc:
+            raise ChildProcessError(f"Failed to install widgetron server app. {rc}")
 
 
 def build_installer(kwargs):
     dir = kwargs["temp_files"] / "constructor"
-    check_call(f"constructor {dir} --output-dir {kwargs['outdir']}", shell=True)
+    rc = call(f"constructor {dir} --output-dir {kwargs['outdir']}")
+    if rc:
+        raise ChildProcessError(f"Constructor Failed. {rc}")
+
 
 
 def cli():

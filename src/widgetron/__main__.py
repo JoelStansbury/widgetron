@@ -25,6 +25,8 @@ WIN = platform.system() == "Windows"
 LINUX = platform.system() == "Linux"
 OSX = platform.system() == "Darwin"
 
+NPM = shutil.which("npm")
+
 
 
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
@@ -267,15 +269,12 @@ def package_electron_app(kwargs):
         # assert icon.suffix.lower() == ".png", "WIP: only png currently supported"
         shutil.copy(str(icon), f"build/icon{icon.suffix}")
 
-        rc = call("npm install .", shell=True)
-        rc = rc or call(
-            "npm run build",
-            shell=True,
-        )
-        if not kwargs["skip_sbom"]: # this needs fixing
+        rc = call([NPM, "install","."])
+        rc = rc or call([NPM, "run","build"])
+        if not kwargs["skip_sbom"]:
             sbom = Path(kwargs["outdir"]) / "npm-sbom.json"
             cmd = [
-                "npm",
+                NPM,
                 "run",
                 "lock",
                 "--",
@@ -284,7 +283,13 @@ def package_electron_app(kwargs):
                 "--output-file",
                 f"{sbom}",
             ]
-            rc = rc or call(cmd, shell=True)
+            attempts = 5
+            while attempts>0:
+                attempts -= 1
+                if call(cmd) == 0:
+                    break
+            else:
+                rc = 1
 
         if OSX or LINUX:
             dist = "dist"

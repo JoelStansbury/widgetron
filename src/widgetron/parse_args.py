@@ -49,6 +49,8 @@ def config():
             flags += ["-"+v.pop("flag")]
         if "default" in v:
             defaults[k] = v.pop("default")
+        if "action" in v:
+            v["action"] = getattr(argparse, v["action"])
         parser.add_argument(*flags, **v)
     kwargs = parser.parse_args()
 

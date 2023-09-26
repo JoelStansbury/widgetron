@@ -1,0 +1,6 @@
+
+[tool.widgetron]
+notebook = "notebooks"
+version = "0.1.0"
+license_file = "LICENSE"
+installer_filename = "Minesweeper_Installer.exe"

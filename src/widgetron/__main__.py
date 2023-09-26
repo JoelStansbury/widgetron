@@ -30,11 +30,11 @@ OSX = platform.system() == "Darwin"
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
 
 if WIN:
-    DEFAULT_ICON = HERE / "icons/widgetron.ico"
+    DEFAULT_ICON = (HERE / "icons/widgetron.ico").absolute()
 elif LINUX:
-    DEFAULT_ICON = HERE / "icons/widgetron.png"
+    DEFAULT_ICON = (HERE / "icons/widgetron.png").absolute()
 elif OSX:
-    DEFAULT_ICON = HERE / "icons/widgetron.icns"
+    DEFAULT_ICON = (HERE / "icons/widgetron.icns").absolute()
 else:
     raise OSError(f"Unknown platform {platform.system()}")
 
@@ -140,13 +140,13 @@ def parse_arguments():
     assert "version" in kwargs
 
     kwargs["icon"] = kwargs.get("icon", DEFAULT_ICON)
+    kwargs["icon_name"] = Path(kwargs["icon"]).name
 
     kwargs["name"] = Path(kwargs["notebook"]).stem
 
     pat = re.compile(r"[^a-zA-Z0-9]")
     kwargs["name_nospace"] = pat.sub("_", kwargs["name"])
 
-    kwargs["icon_name"] = Path(kwargs["icon"]).name
     kwargs["temp_files"] = Path("widgetron_temp_files").resolve()
     kwargs["filename"] = Path(kwargs["notebook"]).name
 
@@ -309,7 +309,6 @@ def package_electron_app(kwargs):
 def copy_icon(kwargs):
     icon = Path(kwargs["icon"])
     shutil.copy(str(icon), kwargs["temp_files"] / f"recipe/{icon.name}")
-    kwargs["icon"] = icon.name
 
 
 def get_conda_build_args(recipe_dir:Path,output_dir:Path) -> list[str]:
@@ -379,22 +378,23 @@ def build_installer(kwargs):
             ".", 
             "--output-dir",
             str(kwargs['outdir'].resolve()),
-            "--conda-exe",
-            shutil.which('mamba') or shutil.which('mamba.exe'),
         ], cwd=kwargs["temp_files"] / "constructor")
     return rc
-
 
 def cli():
     rc = 0
     kwargs = parse_arguments()
 
     render_templates(**kwargs)
-    package_electron_app(kwargs)
 
     copy_source_code(kwargs)
     copy_notebook(kwargs)
     copy_icon(kwargs)
+
+    if kwargs["template_only"]:
+        sys.exit(rc)
+
+    package_electron_app(kwargs)
     rc = rc or build_sdist_package(kwargs)
     rc = rc or build_conda_package(kwargs)
     rc = rc or build_installer(kwargs)

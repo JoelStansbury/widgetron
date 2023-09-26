@@ -11,6 +11,10 @@ skip_sbom:
     default: false
     help: "If true, no sbom will be generated."
 
+template_only:
+    default: false
+    help: "Stop after rendering templates."
+
 author:
     default: "Widgetron Contributors"
     help: "Name of the Author."

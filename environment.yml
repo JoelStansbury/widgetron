@@ -12,6 +12,7 @@ dependencies:
   - isort
   - jupyterlab >=3, <4
   - nodejs >=18, <19
+  - pytest
   - python >=3.9, <3.12
   - pyyaml
   - tomli

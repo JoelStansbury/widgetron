@@ -25,11 +25,11 @@
     }
   },
   "devDependencies": {
-    "@cyclonedx/cyclonedx-npm": "^1.9.2",
-    "electron": "^22.3.1",
-    "electron-builder": "^23.6.0"
+    "@cyclonedx/cyclonedx-npm": ">=1.9.2",
+    "electron": ">=25",
+    "electron-builder": ">=24"
   },
   "dependencies": {
-    "electron-store": "^8.1.0"
+    "electron-store": ">=8.1.0"
   }
 }

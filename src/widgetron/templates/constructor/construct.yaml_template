@@ -1,5 +1,6 @@
 name: {{name_nospace}}
 version: {{version}}
+{%- if "environment" not in constructor_params %}
 channels:
 {%- for c in channels %}
   - {{c}}
@@ -13,6 +14,7 @@ specs:
 {%- for package in dependencies %}
   - {{package}}
 {%- endfor %}
+{%- endif %}
 
 post_install: post_install.sh  # [not win]
 register_python_default: false

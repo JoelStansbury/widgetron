@@ -14,6 +14,7 @@ from .parse_args import CONFIG
 
 from .utils import zipdir, ZERO_EPOCH_TIMESTAMP
 from .jinja_functions import render_templates
+from conda.common.url import path_to_url
 
 HERE = Path(__file__).parent
 PYTHON = Path(sys.executable)
@@ -110,8 +111,6 @@ def parse_arguments():
         
         print(kwargs["dependencies"])
         print(kwargs["channels"])
-    
-    sys.exit(0)
 
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
     if isinstance(kwargs["server_command"], str):
@@ -209,7 +208,7 @@ def parse_arguments():
         ).absolute()
     else:
         kwargs["pkg_output_dir"] = Path(kwargs["pkg_output_dir"]).absolute()
-    kwargs["channels"] = [Path(kwargs['pkg_output_dir']).resolve().as_uri(), *kwargs["channels"]]
+    kwargs["channels"] = [path_to_url(str(kwargs['pkg_output_dir'])), *kwargs["channels"]]
     return kwargs
 
 
@@ -365,8 +364,8 @@ def build_conda_package(kwargs) -> int:
                 "-y",
                 "widgetron_app",
                 "-c",
-                Path(kwargs['pkg_output_dir']).resolve().as_uri(),
-                "--no-shortcuts",
+                path_to_url(str(kwargs['pkg_output_dir'])),
+                *(["--no-shortcuts"] if WIN else []),
                 "--force-reinstall",
             ]
         )

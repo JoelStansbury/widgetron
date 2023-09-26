@@ -270,7 +270,7 @@ def package_electron_app(kwargs):
         "--output-file",
         f"{sbom}",
     ]
-    check_call(cmd, shell=True)
+    check_call(cmd)
 
     if OSX or LINUX:
         dist = "dist"

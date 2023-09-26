@@ -316,8 +316,8 @@ def build_conda_package(kwargs):
                 "widgetron_app",
                 "-c",
                 f"file:///{Path(kwargs['pkg_output_dir']).absolute()}",
-                "--no-shortcuts",
                 "--force-reinstall",
+                *(["--no-shortcuts"] if WIN else []),
             ]
         )
 

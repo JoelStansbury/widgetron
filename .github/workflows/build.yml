@@ -1,4 +1,6 @@
 name: Build
+env:
+  RUN_DEPLOY: ${{ startsWith( github.event.head_commit.message, '[DEPLOY]' }}
 
 on:
   push:
@@ -7,49 +9,6 @@ on:
     branches: '*'
 
 jobs:
-  test_deploy:
-    if: "!contains(github.event.head_commit.message, 'BUILD')"
-    defaults:
-      run:
-        shell: bash -l {0}
-    name: Deploy ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [
-          "ubuntu-latest", 
-          # "windows-latest", 
-          # "macOS-latest"
-        ]
-    steps:
-      - name: Install Widgetron
-        run: |
-          python -m pip install . --no-build-isolation
-      
-      - name: Print Help
-        run: |
-          widgetron -h
-      
-      - name: Setup Test Env
-        run: |
-          mamba env create -f examples/single_notebook/environment.yml -p examples/single_notebook/.envs/dev
-
-      - name: Run Widgetron
-        run: |
-          widgetron examples/single_notebook --outdir=output --installer_filename=single_notebook_installer
-          rm -r examples/single_notebook/widgetron_temp_files
-      
-      - name: Run Installer
-        run: |
-          sh output/single_notebook_installer -b -p ~/single_notebook
-      
-      - name: Upload Installer
-        uses: actions/upload-artifact@v3
-        with:
-          name: linux_installer
-          path: output/*
-          if-no-files-found: error
-      
   build:
     defaults:
       run:
@@ -63,29 +22,73 @@ jobs:
         ]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          environment-file: environment.yml
-          use-mamba: true
-
-      - name: Package
+      - name: test deploy tag
+        if: ${{ RUN_DEPLOY }}
         run: |
-          set -eux
+          echo "Running Deploy!"
+      - name: test deploy tag
+        if: ${{ !RUN_DEPLOY }}
+        run: |
+          echo "Running Deploy!"
 
-          pip install build
-          python -m build
-        if: matrix.os == 'ubuntu-latest'
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+
+      # - name: Setup Mambaforge
+      #   uses: conda-incubator/setup-miniconda@v2
+      #   with:
+      #     miniforge-variant: Mambaforge
+      #     miniforge-version: latest
+      #     environment-file: environment.yml
+      #     use-mamba: true
+
+
+      # - name: Install Widgetron
+      #   if: RUN_DEPLOY
+      #   run: |
+      #     python -m pip install . --no-build-isolation
+      
+      # - name: Print Help
+      #   if: RUN_DEPLOY
+      #   run: |
+      #     widgetron -h
+      
+      # - name: Setup Test Env
+      #   if: RUN_DEPLOY
+      #   run: |
+      #     mamba env create -f examples/single_notebook/environment.yml -p examples/single_notebook/.envs/dev
+
+      # - name: Run Widgetron
+      #   if: RUN_DEPLOY
+      #   run: |
+      #     widgetron examples/single_notebook --outdir=output --installer_filename=single_notebook_installer
+      #     rm -r examples/single_notebook/widgetron_temp_files
+      
+      # - name: Run Installer
+      #   if: RUN_DEPLOY
+      #   run: |
+      #     sh output/single_notebook_installer -b -p ~/single_notebook
+      
+      # - name: Upload Installer
+      #   if: RUN_DEPLOY
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: linux_installer
+      #     path: output/*
+      #     if-no-files-found: error
+
+      # - name: Package
+      #   run: |
+      #     set -eux
+
+      #     pip install build
+      #     python -m build
+      #   if: matrix.os == 'ubuntu-latest'
         
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: package-artifacts
-          path: dist/*
-          if-no-files-found: error
-        if: matrix.os == 'ubuntu-latest'
+      # - name: Upload Artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: package-artifacts
+      #     path: dist/*
+      #     if-no-files-found: error
+      #   if: matrix.os == 'ubuntu-latest'

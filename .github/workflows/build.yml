@@ -50,7 +50,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
 
       - name: Test Widgetron
-        if: startsWith( github.event.commits[0].message, 'DEPLOY' )
+        if: startsWith( github.event.commits[0].message, '[DEPLOY]' )
         run: |
           python -m pip install . --no-build-isolation
           widgetron -h
@@ -60,7 +60,7 @@ jobs:
           sh output/single_notebook_installer -b -p ~/single_notebook
 
       - name: Upload Installer
-        if: startsWith( github.event.commits[0].message, 'DEPLOY' )
+        if: startsWith( github.event.commits[0].message, '[DEPLOY]' )
         uses: actions/upload-artifact@v3
         with:
           name: linux_installer

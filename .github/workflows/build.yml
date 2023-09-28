@@ -1,6 +1,6 @@
 name: Build
 env:
-  RUN_DEPLOY: False
+  RUN_DEPLOY: ${{ false }}
 
 on:
   push:

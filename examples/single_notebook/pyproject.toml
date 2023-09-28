@@ -1,8 +1,8 @@
 
 [tool.widgetron]
-notebook = "my_notebook.ipynb"
+notebook = "nb"
 version = "0.1.0"
-explicit_lock = "conda-win-64.lock"
-python_source = "my_package"
+environment = ".envs/dev"
 window_style = "Hidden"
 outdir = "output"
+license_file = "LICENSE"

@@ -34,18 +34,16 @@ jobs:
           use-mamba: true
 
       - name: Test
+        if: "!contains(github.event.head_commit.message, '[build]')"
         run: |
           python -m pip install . --no-build-isolation
           widgetron -h
           mamba env create -f examples/single_notebook/environment.yml -p examples/single_notebook/.envs/dev
           widgetron examples/single_notebook --outdir=output --installer_filename=single_notebook_installer
           rm -r examples/single_notebook/widgetron_temp_files
-          bash output/single_notebook_installer -b -p ~/single_notebook
+          sh output/single_notebook_installer -b -p ~/single_notebook
           conda activate ~/single_notebook
           conda list widgetron_app
-
-      
-      - name: Upload Installer
         uses: actions/upload-artifact@v3
         with:
           name: linux_installer

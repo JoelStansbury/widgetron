@@ -1,5 +1,9 @@
-touch ~/Desktop/{{name_nospace}}.sh
-echo "source $PREFIX/etc/profile.d/conda.sh" >> ~/Desktop/{{name_nospace}}.sh
-echo "conda activate $PREFIX/" >> ~/Desktop/{{name_nospace}}.sh
-echo "python -m widgetron_app" >> ~/Desktop/{{name_nospace}}.sh
-chmod +x ~/Desktop/{{name_nospace}}.sh
+if [ -d "~/Desktop" ]; then
+    touch ~/Desktop/{{name_nospace}}.sh
+    echo "source $PREFIX/etc/profile.d/conda.sh" >> ~/Desktop/{{name_nospace}}.sh
+    echo "conda activate $PREFIX/" >> ~/Desktop/{{name_nospace}}.sh
+    echo "python -m widgetron_app" >> ~/Desktop/{{name_nospace}}.sh
+    chmod +x ~/Desktop/{{name_nospace}}.sh
+else
+    echo "No ~/Desktop directory exists... Skipping shortcut"
+fi

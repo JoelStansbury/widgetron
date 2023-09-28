@@ -7,11 +7,12 @@ import zipfile
 SETTINGS = dict(DRY_RUN = False, log = Path("commands").absolute())
 
 
-def call(cmd, **kw):
+def call(cmd, **kw) -> int:
     with SETTINGS["log"].open(mode="a") as f:
         f.write(" ".join([str(x) for x in cmd]) + "\n")
     if not SETTINGS["DRY_RUN"]:
-        subprocess.call(cmd, **kw)
+        return subprocess.call(cmd, **kw)
+    return 0
 
 
 def copy(src, dst, **kw):

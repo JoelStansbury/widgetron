@@ -1,6 +1,6 @@
 name: Build
 env:
-  COMMIT_MESSAGE: ${{ toJson(github.event.head_commit) }}
+  COMMIT_MESSAGE: ${{ toJson(github.event) }}
 
 on:
   push:

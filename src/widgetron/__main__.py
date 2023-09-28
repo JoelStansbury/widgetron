@@ -26,7 +26,10 @@ LINUX = platform.system() == "Linux"
 OSX = platform.system() == "Darwin"
 
 NPM = shutil.which("npm")
+FLIT = shutil.which("flit")
 
+assert NPM, f"Missing dependencies (npm)"
+assert NPM, f"Missing dependencies (flit)"
 
 
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
@@ -316,7 +319,7 @@ def copy_icon(kwargs):
     shutil.copy(str(icon), kwargs["temp_files"] / f"recipe/{icon.name}")
 
 
-def get_conda_build_args(recipe_dir:Path,output_dir:Path) -> list[str]:
+def get_conda_build_args(recipe_dir:Path, output_dir:Path) -> list[str]:
     return [
         "boa", "build", 
         str(recipe_dir.resolve()), 
@@ -357,12 +360,11 @@ def build_conda_package(kwargs) -> int:
 
     if not rc and "environment" in kwargs:
         # TODO: move this to a better function
-        rc = call(
-            [
+        cmd = [
                 "conda",
                 "run",
                 "--prefix",
-                kwargs["environment"],
+                str(kwargs["environment"]),
                 "mamba", # TODO respect conda_exe
                 "install",
                 "-y",
@@ -372,7 +374,8 @@ def build_conda_package(kwargs) -> int:
                 *(["--no-shortcuts"] if WIN else []),
                 "--force-reinstall",
             ]
-        )
+        Path("install command.txt").write_text(" ".join(cmd))
+        rc = call(cmd)
     return rc
 
 

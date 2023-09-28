@@ -58,10 +58,10 @@ jobs:
           widgetron examples/single_notebook --outdir=output --installer_filename=single_notebook_installer
           rm -r examples/single_notebook/widgetron_temp_files
           sh output/single_notebook_installer -b -p ~/single_notebook
-        if: $RUN_DEPLOY == "1"
+        if: RUN_DEPLOY == '1'
 
       - name: Upload Installer
-        if: $RUN_DEPLOY == "1"
+        if: RUN_DEPLOY == '1'
         uses: actions/upload-artifact@v3
         with:
           name: linux_installer

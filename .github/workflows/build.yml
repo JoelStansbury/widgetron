@@ -31,7 +31,7 @@ jobs:
           echo "Running Deploy!"
 
       - name: "true"
-        # if: ${{ RUN_DEPLOY }}
+        if: startsWith( $COMMIT_MESSAGE, "[DEPLOY]")
         run: |
           echo "Running Deploy!"
 

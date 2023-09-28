@@ -40,7 +40,6 @@ OSX = platform.system() == "Darwin"
 assert NPM, f"Missing dependencies (npm)"
 assert CONDA, "Could not find conda"
 
-# CONDA_BUILD = "conda-mambabuild {} -c https://conda.anaconda.org/conda-forge --no-test --no-verify --output-folder {}"
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
 
 if WIN:
@@ -251,36 +250,35 @@ def copy_notebook(kwargs):
 def package_electron_app(kwargs):
     icon = Path(kwargs["icon"]).absolute()
     cwd = Path().absolute()
-
-    cd(str(kwargs["temp_files"] / "electron"))
-    Path("build").mkdir(exist_ok=True)
-    # assert icon.suffix.lower() == ".png", "WIP: only png currently supported"
-    copy(str(icon), f"build/icon{icon.suffix}")
-
-    call([NPM, "install", ".", "--no-optional"])
-
-    call([NPM, "run", "build"])
-
-    if not kwargs["skip_sbom"]:
-        sbom = Path(kwargs["outdir"]) / "npm-sbom.json"
-        cmd = [
-            NPM,
-            "run",
-            "lock",
-            "--",
-            "--output-format",
-            "json",
-            "--output-file",
-            f"{sbom}",
-        ]
-        call(cmd)
-
-    if OSX or LINUX:
-        dist = "dist"
-    elif WIN:
-        dist = "dist/win-unpacked"
-
     try:
+        cd(kwargs["temp_files"] / "electron")
+        Path("build").mkdir(exist_ok=True)
+        # assert icon.suffix.lower() == ".png", "WIP: only png currently supported"
+        copy(str(icon), f"build/icon{icon.suffix}")
+
+        call([NPM, "install", ".", "--no-optional"])
+
+        call([NPM, "run", "build"])
+
+        if not kwargs["skip_sbom"]:
+            sbom = Path(kwargs["outdir"]) / "npm-sbom.json"
+            cmd = [
+                NPM,
+                "run",
+                "lock",
+                "--",
+                "--output-format",
+                "json",
+                "--output-file",
+                f"{sbom}",
+            ]
+            call(cmd)
+
+        if OSX or LINUX:
+            dist = "dist"
+        elif WIN:
+            dist = "dist/win-unpacked"
+
         cd(dist)
 
         if OSX or LINUX:
@@ -290,7 +288,7 @@ def package_electron_app(kwargs):
         elif WIN:
             zipdir(".", "../../../server/widgetron_app/ui.zip")
     finally:
-        cd(str(cwd))
+        cd(cwd)
 
 
 def copy_icon(kwargs):

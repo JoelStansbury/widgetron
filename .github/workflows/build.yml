@@ -27,12 +27,12 @@ jobs:
           echo "Running Deploy!"
 
       - name: "true"
-        if: ${{ RUN_DEPLOY }}
+        # if: ${{ RUN_DEPLOY }}
         run: |
           echo "Running Deploy!"
 
       - name: "false"
-        if: ${{ !RUN_DEPLOY }}
+        # if: ${{ !RUN_DEPLOY }}
         run: |
           echo "Not Running Deploy!"
 

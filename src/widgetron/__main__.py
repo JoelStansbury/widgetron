@@ -313,9 +313,8 @@ def get_conda_build_args(recipe_dir: Path, output_dir: Path) -> list[str]:
 
 def build_sdist_package(kwargs) -> int:
     srcdir = kwargs["temp_files"] / "server"
-    cmd = ["python", "-m", "build", srcdir, "--sdist", "--no-isolation"]
-
-    return call(cmd)
+    cmd = ["python", "setup.py", "sdist"]
+    return call(cmd, cwd=str(srcdir))
 
 
 def get_conda_build_env(kwargs) -> dict[str, str]:

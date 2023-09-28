@@ -1,0 +1,19 @@
+package:
+  name: widgetron_app
+  version: 0.0.1
+
+source:
+  url: '{{ environ.SDIST_URL }}'
+
+build:
+  string: 'py0'
+  ignore_prefix_files:
+    - Lib/site-packages/widgetron_app/*.zip
+
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - python

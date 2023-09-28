@@ -2,9 +2,30 @@
 directory:
     default: "."
     nargs: "?"
+    positional: true
     help: |
         Directory to build in. This is also where the utility will search for
         relevant config files (i.e. `environment.yml`, `setup.cfg`, `pyproject.toml`)
+
+skip_sbom:
+    default: false
+    help: "If true, no sbom will be generated."
+
+template_only:
+    default: false
+    help: "Stop after rendering templates."
+
+author:
+    default: "Widgetron Contributors"
+    help: "Name of the Author."
+
+description:
+    default: "Widgetron application"
+    help: "This is the description provided to electron/node_package.json."
+
+python_version:
+    flag: "-py"
+    default: "auto"
 
 outdir:
     flag: "-o"
@@ -20,7 +41,7 @@ version:
     help: "Version number."
 
 environment:
-    flag: "-environment"
+    flag: "-env"
     help: |
         Path to pre-built environment.
         If provided, the dependencies argument is ignored.
@@ -31,7 +52,6 @@ environment:
         `conda activate {environment} && python -m widgetron_app`
 
 pkg_output_dir:
-    flag: "--pkg_output_dir"
     help: "Where to place intermediate conda packages."
 
 dependencies:
@@ -64,6 +84,19 @@ explicit_lock:
         This option is useful for debugging as you can test it with...
         `conda activate widgetron_temp_files/.env && python -m widgetron_app`
 
+environment_yaml:
+    flag: "-f"
+    help: |
+        Path to environment.yml file.
+        If provided, the dependencies argument is ignored.
+        If provided, the channels argument is ignored.
+        Widgetron will build the environment using
+        `mamba env update --file {environment_yaml} --prefix widgetron_temp_files/.env`
+        The widgetron_app package will be installed to this environment and the
+        installer will build directly from this env.
+        This option is useful for debugging as you can test it with...
+        `conda activate widgetron_temp_files/.env && python -m widgetron_app`
+
 python_source:
     flag: "-src"
     help: |
@@ -73,12 +106,10 @@ python_source:
         into a package shell immediately next to the notebook.
 
 server_command:
-    flag: "-sc"
     nargs: "+"
     help: How to launch JupyterLab. Default `["jupyter", "lab", "--no-browser"]`
 
 icon:
-    flag: "-icon"
     help: |
         256 by 256 icon file (must be appropriate to OS)
             win: .ico
@@ -86,7 +117,6 @@ icon:
             linux: .png
 
 url_whitelist:
-    flag: "-url_whitelist"
     nargs: "+"
     help: |
         By default external links do nothing. This is for better security.
@@ -96,7 +126,6 @@ url_whitelist:
         domain_whitelist argument.
 
 domain_whitelist:
-    flag: "-domain_whitelist"
     nargs: "+"
     help: |
         By default external links do nothing. This is for better security.
@@ -106,7 +135,6 @@ domain_whitelist:
         url_whitelist argument.
 
 window_style:
-    flag: "-window_style"
     help: |
         (Windows only) Set the WindowStyle for powershell.
     default: Minimized
@@ -129,7 +157,6 @@ installer_filename:
         https://github.com/conda/constructor/blob/main/CONSTRUCT.md#installer_filename
 
 installer_type:
-    flag: "-installer_type"
     help: |
         The type of the installer being created. Possible values are:
             - sh: shell-based installer for Linux or macOS;
@@ -140,21 +167,18 @@ installer_type:
         as well as sh on Linux and exe on Windows.
 
 license_file:
-    flag: "-license_file"
     help: |
         Path to the license file being displayed by the installer during the install process.
         It must be plain text (.txt) for shell-based installers. On PKG, .txt, .rtf and 
         .html are supported. On Windows, .txt and .rtf are supported.
 
 batch_mode:
-    flag: "-batch_mode"
     help: |
         Only affects .sh installers. If False (default), the installer launches
         an interactive wizard guiding the user through the available options.
         If True, the installer runs automatically as if -b was passed.
 
 signing_identity_name:
-    flag: "-signing_identity_name"
     help: |
         By default, the MacOS pkg installer isn't signed. If an identity name is
         specified using this option, it will be used to sign the installer with
@@ -165,44 +189,37 @@ signing_identity_name:
             Developer ID Installer: Name of the owner (XXXXXX)
 
 welcome_image:
-    flag: "-welcome_image"
     help: |
         Path to an image in any common image format (.png, .jpg, .tif, etc.) to 
         be used as the welcome image for the Windows installer. The image is 
         re-sized to 164 x 314 pixels. By default, an image is automatically generated.
 
 header_image:
-    flag: "-header_image"
     help: |
         Like welcome_image for Windows, re-sized to 150 x 57 pixels.
 
 default_image_color:
-    flag: "-default_image_color"
     help: |
         The color of the default images (when not providing explicit image files) 
         used on Windows. Possible values are red, green, blue, yellow. The default is blue.
     
 welcome_image_text:
-    flag: "-welcome_image_text"
     help: |
         If welcome_image is not provided, use this text when generating the image
         (Windows only). Defaults to name.
 
 header_image_text:
-    flag: "-header_image_text"
     help: |
         If header_image is not provided, use this text when generating the image
         (Windows only). Defaults to name.
 
 nsis_template:
-    flag: "-nsis_template"
     help: |
         If nsis_template is not provided, constructor uses its default NSIS template.
         For more complete customization for the installation experience, provide
         an NSIS template file. (Windows only)
 
 default_prefix:
-    flag: "-default_prefix"
     help: |
         You probably want to use default_prefix_domain_user instead.
         The following description from the constructor repo does not reflect the
@@ -215,7 +232,6 @@ default_prefix:
         If not provided, the default prefix is ${USERPROFILE}\${NAME}.
 
 default_prefix_domain_user:
-    flag: "-default_prefix_domain_user"
     help: |
         Set default installation prefix for domain user. If not provided, the
         installation prefix for domain user will be ${LOCALAPPDATA}\${NAME}.
@@ -223,7 +239,6 @@ default_prefix_domain_user:
         installing the distribution in the roaming profile. Windows only.
 
 default_prefix_all_users:
-    flag: "-default_prefix_all_users"
     help: |
         You probably want to use default_prefix_domain_user instead.
         I would not recomend advising users to install your app for "All Users"

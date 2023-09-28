@@ -1,3 +1,4 @@
+from hashlib import sha256
 import json
 import os
 import platform
@@ -6,11 +7,12 @@ import shutil
 import sys
 import zipfile
 from pathlib import Path
-from subprocess import check_call, Popen, PIPE
+from subprocess import Popen, PIPE
 
 import yaml
 
 from .parse_args import CONFIG
+from .utils import call, copy, copytree, move, cd
 
 
 def zipdir(path, ziph):
@@ -25,24 +27,38 @@ def zipdir(path, ziph):
 
 from .jinja_functions import render_templates
 
+
+CMDS = []
+
 HERE = Path(__file__).parent
 PYTHON = Path(sys.executable)
 CONDA_PREFIX = PYTHON.parent
-REQUIRED_PKGS = ["jupyterlab", "conda"]
+REQUIRED_PKGS = [
+    "jupyterlab",
+    "conda",
+]  # menuinst is added separately for exact version
+
+NPM = shutil.which("npm")
+CONDA = shutil.which("conda")
+JAKE = shutil.which("jake")
+CONSTRUCTOR = shutil.which("constructor")
 
 WIN = platform.system() == "Windows"
 LINUX = platform.system() == "Linux"
 OSX = platform.system() == "Darwin"
 
-CONDA_BUILD = "conda-mambabuild {} -c https://conda.anaconda.org/conda-forge --no-test --no-verify --output-folder {}"
+assert NPM, f"Missing dependencies (npm)"
+assert CONDA, "Could not find conda"
+
+# CONDA_BUILD = "conda-mambabuild {} -c https://conda.anaconda.org/conda-forge --no-test --no-verify --output-folder {}"
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
 
 if WIN:
-    DEFAULT_ICON = HERE / "icons/widgetron.ico"
+    DEFAULT_ICON = (HERE / "icons/widgetron.ico").absolute()
 elif LINUX:
-    DEFAULT_ICON = HERE / "icons/widgetron.png"
+    DEFAULT_ICON = (HERE / "icons/widgetron.png").absolute()
 elif OSX:
-    DEFAULT_ICON = HERE / "icons/widgetron.icns"
+    DEFAULT_ICON = (HERE / "icons/widgetron.icns").absolute()
 else:
     raise OSError(f"Unknown platform {platform.system()}")
 
@@ -86,11 +102,9 @@ def _is_installed(env, library):
     return bool(json.loads(output))
 
 
-def _install_missing_pkgs(env, pkgs):
-    CONDA = shutil.which("conda")
-    check_call(
-        [CONDA, "install", "--prefix", str(env), "-y", *pkgs, "-c", "conda-forge"]
-    )
+def _install_missing_pkgs(env, pkgs) -> int:
+    cmd = [CONDA, "install", "--prefix", str(env), "-y", *pkgs, "-c", "conda-forge"]
+    return call(cmd)
 
 
 def parse_arguments():
@@ -99,13 +113,16 @@ def parse_arguments():
     kwargs["channels"] = kwargs.get(
         "channels", ["https://conda.anaconda.org/conda-forge"]
     )
-
+    if kwargs["python_version"] == "auto":
+        kwargs["python_version"] = ".".join(list(map(str, sys.version_info[:2])))
     if isinstance(kwargs["dependencies"], str):
         kwargs["dependencies"] = kwargs["dependencies"].strip().split()
     if isinstance(kwargs["channels"], str):
         kwargs["channels"] = kwargs["channels"].strip().split()
-
-    elif "environment_yaml" in kwargs:
+    if kwargs["license_file"]:
+        kwargs["license_file"] = str(Path(kwargs["license_file"]).absolute())
+    if "environment_yaml" in kwargs:
+        print("found env.yml")
         with open(kwargs["environment_yaml"], "r") as f:
             _env = yaml.safe_load(f)
         kwargs["dependencies"] += _env["dependencies"]
@@ -139,14 +156,14 @@ def parse_arguments():
     assert "version" in kwargs
 
     kwargs["icon"] = kwargs.get("icon", DEFAULT_ICON)
+    kwargs["icon_name"] = Path(kwargs["icon"]).name
 
     kwargs["name"] = Path(kwargs["notebook"]).stem
 
     pat = re.compile(r"[^a-zA-Z0-9]")
     kwargs["name_nospace"] = pat.sub("_", kwargs["name"])
 
-    kwargs["icon_name"] = Path(kwargs["icon"]).name
-    kwargs["temp_files"] = Path("widgetron_temp_files")
+    kwargs["temp_files"] = Path("widgetron_temp_files").resolve()
     kwargs["filename"] = Path(kwargs["notebook"]).name
 
     if "explicit_lock" in kwargs:
@@ -154,21 +171,24 @@ def parse_arguments():
             "environment" not in kwargs
         ), "cannot provide env and lock at the same time."
 
-        # Generate SBOM (because we can)
-        cmd = [
-            "jake",
-            "sbom",
-            "-t=CONDA",
-            f"-f={kwargs['explicit_lock']}",
-            "--output-format=json",
-            f"-o={Path(kwargs['outdir'])/'conda-sbom.json'}",
-        ]
-        check_call(cmd)
+        if not kwargs["skip_sbom"]:
+            assert JAKE, "Missing jake. Cannot produce conda sbom."
+
+            # Generate SBOM (because we can)
+            cmd = [
+                JAKE,
+                "sbom",
+                "-t=CONDA",
+                f"-f={kwargs['explicit_lock']}",
+                "--output-format=json",
+                f"-o={Path(kwargs['outdir'])/'conda-sbom.json'}",
+            ]
+            call(cmd)
 
         # Build the environment and reference the env directory
-        check_call(
+        call(
             [
-                "conda",
+                CONDA,
                 "create",
                 "--file",
                 kwargs["explicit_lock"],
@@ -176,6 +196,7 @@ def parse_arguments():
                 kwargs["temp_files"] / ".env",
             ]
         )
+
         kwargs["environment"] = kwargs["temp_files"] / ".env"
 
     if "environment" in kwargs:
@@ -205,7 +226,7 @@ def parse_arguments():
         ).absolute()
     else:
         kwargs["pkg_output_dir"] = Path(kwargs["pkg_output_dir"]).absolute()
-    kwargs["channels"].append(f"file:///{kwargs['pkg_output_dir']}")
+    kwargs["channels"] = [kwargs["pkg_output_dir"].as_uri(), *kwargs["channels"]]
     return kwargs
 
 
@@ -220,9 +241,9 @@ def copy_source_code(kwargs):
             dest = dest / Path(kwargs["python_source"]).stem
             if dest.exists():
                 shutil.rmtree(dest)
-            shutil.copytree(kwargs["python_source"], dest)
+            copytree(kwargs["python_source"], dest)
         elif Path(kwargs["python_source"]).is_file():
-            shutil.copy(
+            copy(
                 kwargs["python_source"],
                 dest,
             )
@@ -231,114 +252,178 @@ def copy_source_code(kwargs):
 def copy_notebook(kwargs):
     # Copy notebook into template
     # Check filetype
-    dest = kwargs["temp_files"] / "server/widgetron_app/notebooks"
+    server = kwargs["temp_files"] / "server"
+    dest = server / "widgetron_app/notebooks"
     nb = Path(kwargs["notebook"])
+
+    if kwargs.get("license_file"):
+        copy(kwargs["license_file"], server / "LICENSE.txt")
+
+    if dest.exists():
+        shutil.rmtree(dest)
+    dest.mkdir()
 
     if nb.is_file():
         assert nb.suffix.lower() == ".ipynb", f"{nb} is not a notebook"
-        shutil.copy(nb, dest)
+        copy(nb, dest / nb.name)
     else:
         dest = dest / nb.stem
         if dest.exists():
             shutil.rmtree(dest)
+            CMDS.append(["rm", "-r", str(dest)])
         assert list(nb.glob("*.ipynb")), f"No notebooks found in {nb}"
-        shutil.copytree(nb, dest)
+        copytree(nb, dest)
 
 
 def package_electron_app(kwargs):
     icon = Path(kwargs["icon"]).absolute()
     cwd = Path().absolute()
 
-    os.chdir(str(kwargs["temp_files"] / "electron"))
+    cd(str(kwargs["temp_files"] / "electron"))
     Path("build").mkdir(exist_ok=True)
     # assert icon.suffix.lower() == ".png", "WIP: only png currently supported"
-    shutil.copy(str(icon), f"build/icon{icon.suffix}")
+    copy(str(icon), f"build/icon{icon.suffix}")
 
-    check_call("npm install .", shell=True)
-    sbom = Path(kwargs["outdir"]) / "npm-sbom.json"
-    check_call(
-        "npm run build",
-        shell=True,
-    )
-    cmd = [
-        "npm",
-        "run",
-        "lock",
-        "--",
-        "--output-format",
-        "json",
-        "--output-file",
-        f"{sbom}",
-    ]
-    check_call(cmd, shell=True)
+    call([NPM, "install", ".", "--no-optional"])
+
+    call([NPM, "run", "build"])
+
+    if not kwargs["skip_sbom"]:
+        sbom = Path(kwargs["outdir"]) / "npm-sbom.json"
+        cmd = [
+            NPM,
+            "run",
+            "lock",
+            "--",
+            "--output-format",
+            "json",
+            "--output-file",
+            f"{sbom}",
+        ]
+        call(cmd)
 
     if OSX or LINUX:
         dist = "dist"
     elif WIN:
         dist = "dist/win-unpacked"
 
-    os.chdir(dist)
+    try:
+        cd(dist)
 
-    if OSX or LINUX:
-        src = list(Path().glob("widgetron*.zip"))[0]
-        dst = "../../server/widgetron_app"
-        print(f"Moving '{src}' to '{dst / src}'")
-        shutil.move(src, dst / src)
-        assert (dst / src).exists(), "Move Failed"
-    elif WIN:
-        with zipfile.ZipFile(
-            "../../../server/widgetron_app/ui.zip", "w", zipfile.ZIP_DEFLATED
-        ) as zipf:
-            zipdir(".", zipf)
-
-    os.chdir(str(cwd))
+        if OSX or LINUX:
+            src = list(Path().glob("widgetron*.zip"))[0]
+            dst = "../../server/widgetron_app"
+            move(src, dst / src)
+        elif WIN:
+            with zipfile.ZipFile(
+                "../../../server/widgetron_app/ui.zip", "w", zipfile.ZIP_DEFLATED
+            ) as zipf:
+                zipdir(".", zipf)
+    finally:
+        cd(str(cwd))
 
 
 def copy_icon(kwargs):
     icon = Path(kwargs["icon"])
-    shutil.copy(str(icon), kwargs["temp_files"] / f"recipe/{icon.name}")
-    kwargs["icon"] = icon.name
+    copy(str(icon), kwargs["temp_files"] / f"recipe/{icon.name}")
+    kwargs["icon_name"] = icon.name
 
 
-def build_conda_package(kwargs):
+def get_conda_build_args(recipe_dir: Path, output_dir: Path) -> list[str]:
+    cmd = [
+        "boa",
+        "build",
+        str(recipe_dir.resolve()),
+        "--no-test",
+        "--output-folder",
+        str(output_dir.resolve()),
+        "--skip-existing",
+    ]
+
+    return cmd
+
+
+def build_sdist_package(kwargs) -> int:
+    srcdir = kwargs["temp_files"] / "server"
+    cmd = ["python", "-m", "build", srcdir, "--sdist", "--no-isolation"]
+
+    return call(cmd)
+
+
+def get_conda_build_env(kwargs) -> dict[str, str]:
+    env = dict(**os.environ)
+    sdist = next((kwargs["temp_files"] / "server/dist").glob("*.tar.gz"))
+    env.update(
+        SDIST_URL=sdist.as_uri(), SDIST_SHA256=sha256(sdist.read_bytes()).hexdigest()
+    )
+
+    return env
+
+
+def build_conda_package(kwargs) -> int:
     dir = kwargs["temp_files"] / "recipe"
-    check_call(CONDA_BUILD.format(dir, kwargs["pkg_output_dir"]), shell=True)
-    if "environment" in kwargs:
-        check_call(
-            [
-                "conda",
-                "run",
-                "--prefix",
-                kwargs["environment"],
-                "conda",
-                "install",
-                "-y",
-                "widgetron_app",
-                "-c",
-                f"file:///{Path(kwargs['pkg_output_dir']).absolute()}",
-                "--force-reinstall",
-                *(["--no-shortcuts"] if WIN else []),
-            ]
-        )
+    rc = call(
+        get_conda_build_args(dir, kwargs["pkg_output_dir"]),
+        env=get_conda_build_env(kwargs),
+    )
+
+    if (not rc) and "environment" in kwargs:
+        # TODO: move this to a better function
+        if _is_installed(kwargs["environment"], "widgetron_app"):
+            call(
+                [
+                    CONDA,
+                    "run",
+                    "--prefix",
+                    str(kwargs["environment"]),
+                    "remove",
+                    "widgetron_app",
+                    "-y",
+                ]
+            )
+        cmd = [
+            CONDA,
+            "run",
+            "--prefix",
+            str(kwargs["environment"]),
+            "conda",  # TODO respect conda_exe
+            "install",
+            "-y",
+            "widgetron_app",
+            "-c",
+            kwargs["pkg_output_dir"].as_uri(),
+            *(["--no-shortcuts"] if WIN else []),
+            "--force-reinstall",
+        ]
+
+        rc = call(cmd)
+    return rc
 
 
 def build_installer(kwargs):
     dir = kwargs["temp_files"] / "constructor"
-    check_call(f"constructor {dir} --output-dir {kwargs['outdir']}", shell=True)
+    cmd = [CONSTRUCTOR, str(dir), "--output-dir", str(kwargs["outdir"])]
+    return call(cmd)
 
 
 def cli():
     kwargs = parse_arguments()
 
     render_templates(**kwargs)
-    package_electron_app(kwargs)
 
     copy_source_code(kwargs)
     copy_notebook(kwargs)
     copy_icon(kwargs)
 
-    build_conda_package(kwargs)
-    build_installer(kwargs)
+    if kwargs["template_only"]:
+        sys.exit(rc)
+
+    package_electron_app(kwargs)
+    rc = build_sdist_package(kwargs)
+    rc = rc or build_conda_package(kwargs)
+    rc = rc or build_installer(kwargs)
+
+    sys.exit(rc)
 
 
 if __name__ == "__main__":

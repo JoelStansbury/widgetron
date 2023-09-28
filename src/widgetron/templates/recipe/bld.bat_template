@@ -1,4 +1,5 @@
-call python -m pip install .
+@ECHO on
+%PYTHON% -m pip install . -vv --no-deps --no-build-isolation
 set MENU_DIR="%PREFIX%\Menu"
 if not exist %MENU_DIR% mkdir %MENU_DIR%
 copy "%RECIPE_DIR%\widgetron_shortcut.json" %MENU_DIR%

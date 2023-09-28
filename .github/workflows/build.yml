@@ -38,6 +38,7 @@ jobs:
           mkdir installer_output
           python -m pip install . --no-build-isolation
           widgetron -h
+          mamba env create -f examples/single_notebook/environment.yml -p examples/single_notebook/.envs/dev
           widgetron examples/single_notebook --outdir=installer_output --installer_filename=single_notebook_installer
           ./installer_output/single_notebook_installer -b -p ~/single_notebook
       

@@ -7,7 +7,7 @@ source:
   sha256: '{{ environ.SDIST_SHA256 }}'
 
 build:
-  string: 'py0_{{ environ.SDIST_SHA256[:7] }}'
+  string: 'py<< python_version.replace(".", "") >>_{{ environ.SDIST_SHA256[:7] }}'
   ignore_prefix_files:
     - Lib/site-packages/widgetron_app/*.zip
 
@@ -15,6 +15,6 @@ build:
 requirements:
   host:
     - pip
-    - python
+    - python =<< python_version >>.*
   run:
-    - python
+    - python =<< python_version >>.*

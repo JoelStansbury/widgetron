@@ -39,7 +39,7 @@ REQUIRED_PKGS = [
 ]  # menuinst is added separately for exact version
 
 NPM = shutil.which("npm")
-CONDA = shutil.which("conda")
+CONDA = shutil.which("mamba") or shutil.which("conda")
 JAKE = shutil.which("jake")
 CONSTRUCTOR = shutil.which("constructor")
 
@@ -373,10 +373,9 @@ def build_conda_package(kwargs) -> int:
             call(
                 [
                     CONDA,
-                    "run",
+                    "remove",
                     "--prefix",
                     str(kwargs["environment"]),
-                    "remove",
                     "widgetron_app",
                     "-y",
                 ]

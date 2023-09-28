@@ -3,7 +3,10 @@ import configparser
 import os
 from pathlib import Path
 
-import toml
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
 import yaml
 
 HERE = Path(__file__).parent
@@ -26,7 +29,7 @@ def config_file():
             return setup_cfg._sections["tool.widgetron"]
 
     if Path("pyproject.toml").is_file():
-        _toml = toml.load(Path("pyproject.toml"))
+        _toml = tomllib.load(Path("pyproject.toml").open("rb"))
         if "tool" in _toml:
             if "widgetron" in _toml["tool"]:
                 print("Initialize from pyproject.toml")
@@ -39,9 +42,16 @@ def config():
     with ARGS_FILE.open() as f:
         args = yaml.safe_load(f)
     for k, v in args.items():
-        flags = [v.pop("flag"), "--" + k] if "flag" in v else [k]
+        if v.pop("positional", None):
+            flags = [k]
+        else:
+            flags = [f"--{k}"]
+        if "flag" in v:
+            flags += ["-" + v.pop("flag")]
         if "default" in v:
             defaults[k] = v.pop("default")
+        if "action" in v:
+            v["action"] = getattr(argparse, v["action"])
         parser.add_argument(*flags, **v)
     kwargs = parser.parse_args()
 

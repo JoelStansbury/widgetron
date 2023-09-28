@@ -1,6 +1,6 @@
 name: Build
-# env:
-#   RUN_DEPLOY: ${{ startsWith( github.event.head_commit.message, '[DEPLOY]' }}
+env:
+  COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
 
 on:
   push:

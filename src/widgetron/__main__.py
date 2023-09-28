@@ -12,17 +12,7 @@ from subprocess import Popen, PIPE
 import yaml
 
 from .parse_args import CONFIG
-from .utils import call, copy, copytree, move, cd
-
-
-def zipdir(path, ziph):
-    # ziph is zipfile handle
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            ziph.write(
-                os.path.join(root, file),
-                os.path.relpath(os.path.join(root, file), os.path.join(path, "..")),
-            )
+from .utils import call, copy, copytree, move, cd, SETTINGS, zipdir
 
 
 from .jinja_functions import render_templates
@@ -127,6 +117,9 @@ def parse_arguments():
             _env = yaml.safe_load(f)
         kwargs["dependencies"] += _env["dependencies"]
         kwargs["channels"] += _env["channels"]
+    SETTINGS["DRY_RUN"] = kwargs["dry_run"]
+    kwargs["temp_files"] = Path("widgetron_temp_files").resolve()
+    SETTINGS["log"] = Path(kwargs["temp_files"]).absolute() / "commands.txt"
 
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
     if isinstance(kwargs["server_command"], str):
@@ -163,7 +156,6 @@ def parse_arguments():
     pat = re.compile(r"[^a-zA-Z0-9]")
     kwargs["name_nospace"] = pat.sub("_", kwargs["name"])
 
-    kwargs["temp_files"] = Path("widgetron_temp_files").resolve()
     kwargs["filename"] = Path(kwargs["notebook"]).name
 
     if "explicit_lock" in kwargs:
@@ -315,10 +307,7 @@ def package_electron_app(kwargs):
             dst = "../../server/widgetron_app"
             move(src, dst / src)
         elif WIN:
-            with zipfile.ZipFile(
-                "../../../server/widgetron_app/ui.zip", "w", zipfile.ZIP_DEFLATED
-            ) as zipf:
-                zipdir(".", zipf)
+            zipdir(".", "../../../server/widgetron_app/ui.zip")
     finally:
         cd(str(cwd))
 
@@ -352,10 +341,11 @@ def build_sdist_package(kwargs) -> int:
 
 def get_conda_build_env(kwargs) -> dict[str, str]:
     env = dict(**os.environ)
-    sdist = next((kwargs["temp_files"] / "server/dist").glob("*.tar.gz"))
-    env.update(
-        SDIST_URL=sdist.as_uri(), SDIST_SHA256=sha256(sdist.read_bytes()).hexdigest()
-    )
+    if not SETTINGS["DRY_RUN"]:
+        sdist = next((kwargs["temp_files"] / "server/dist").glob("*.tar.gz"))
+        env.update(
+            SDIST_URL=sdist.as_uri(), SDIST_SHA256=sha256(sdist.read_bytes()).hexdigest()
+        )
 
     return env
 
@@ -382,13 +372,11 @@ def build_conda_package(kwargs) -> int:
             )
         cmd = [
             CONDA,
-            "run",
+            "install",
             "--prefix",
             str(kwargs["environment"]),
-            "conda",  # TODO respect conda_exe
-            "install",
-            "-y",
             "widgetron_app",
+            "-y",
             "-c",
             kwargs["pkg_output_dir"].as_uri(),
             *(["--no-shortcuts"] if WIN else []),
@@ -415,7 +403,7 @@ def cli():
     copy_icon(kwargs)
 
     if kwargs["template_only"]:
-        sys.exit(rc)
+        sys.exit(0)
 
     package_electron_app(kwargs)
     rc = build_sdist_package(kwargs)

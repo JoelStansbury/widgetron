@@ -15,6 +15,10 @@ template_only:
     default: false
     help: "Stop after rendering templates."
 
+dry_run:
+    default: false
+    help: "Do not run any commands (e.g. copy, move, ...). Just print them to widgetron_temp_files/commands.txt."
+
 author:
     default: "Widgetron Contributors"
     help: "Name of the Author."

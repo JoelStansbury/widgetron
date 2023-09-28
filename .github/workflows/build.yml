@@ -1,6 +1,6 @@
 name: Build
 env:
-  COMMIT_MESSAGE: ${{ toJson(github.event.commits[0]) }}
+  RUN_DEPLOY: false
 
 on:
   push:
@@ -22,83 +22,65 @@ jobs:
         ]
 
     steps:
-      - name: first
+      - name: Checkout
+        uses: actions/checkout@v3
+
+
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          environment-file: environment.yml
+          use-mamba: true
+
+      - name: Package
         run: |
-          echo "Running Deploy!"
-          echo $COMMIT_MESSAGE
+          set -eux
 
-      - name: "true"
-        run: |
-          echo "Running Deploy!"
-
-      - name: "false"
-        run: |
-          echo "Not Running Deploy!"
-
-      - name: "last"
-        run: |
-          echo "last"
-
-      
-      # - name: Checkout
-      #   uses: actions/checkout@v3
-
-
-      # - name: Setup Mambaforge
-      #   uses: conda-incubator/setup-miniconda@v2
-      #   with:
-      #     miniforge-variant: Mambaforge
-      #     miniforge-version: latest
-      #     environment-file: environment.yml
-      #     use-mamba: true
-
-
-      # - name: Install Widgetron
-      #   if: RUN_DEPLOY
-      #   run: |
-      #     python -m pip install . --no-build-isolation
-      
-      # - name: Print Help
-      #   if: RUN_DEPLOY
-      #   run: |
-      #     widgetron -h
-      
-      # - name: Setup Test Env
-      #   if: RUN_DEPLOY
-      #   run: |
-      #     mamba env create -f examples/single_notebook/environment.yml -p examples/single_notebook/.envs/dev
-
-      # - name: Run Widgetron
-      #   if: RUN_DEPLOY
-      #   run: |
-      #     widgetron examples/single_notebook --outdir=output --installer_filename=single_notebook_installer
-      #     rm -r examples/single_notebook/widgetron_temp_files
-      
-      # - name: Run Installer
-      #   if: RUN_DEPLOY
-      #   run: |
-      #     sh output/single_notebook_installer -b -p ~/single_notebook
-      
-      # - name: Upload Installer
-      #   if: RUN_DEPLOY
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: linux_installer
-      #     path: output/*
-      #     if-no-files-found: error
-
-      # - name: Package
-      #   run: |
-      #     set -eux
-
-      #     pip install build
-      #     python -m build
-      #   if: matrix.os == 'ubuntu-latest'
+          pip install build
+          python -m build
+        if: matrix.os == 'ubuntu-latest'
         
-      # - name: Upload Artifacts
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: package-artifacts
-      #     path: dist/*
-      #     if-no-files-found: error
-      #   if: matrix.os == 'ubuntu-latest'
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: package-artifacts
+          path: dist/*
+          if-no-files-found: error
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Install Widgetron
+        if: RUN_DEPLOY
+        run: |
+          python -m pip install . --no-build-isolation
+      
+      - name: Print Help
+        if: RUN_DEPLOY
+        run: |
+          widgetron -h
+      
+      - name: Setup Test Env
+        if: RUN_DEPLOY
+        run: |
+          mamba env create -f examples/single_notebook/environment.yml -p examples/single_notebook/.envs/dev
+
+      - name: Run Widgetron
+        if: RUN_DEPLOY
+        run: |
+          widgetron examples/single_notebook --outdir=output --installer_filename=single_notebook_installer
+          rm -r examples/single_notebook/widgetron_temp_files
+      
+      - name: Run Installer
+        if: RUN_DEPLOY
+        run: |
+          sh output/single_notebook_installer -b -p ~/single_notebook
+      
+      - name: Upload Installer
+        if: RUN_DEPLOY
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_installer
+          path: output/*
+          if-no-files-found: error
+

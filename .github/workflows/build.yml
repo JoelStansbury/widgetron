@@ -22,6 +22,10 @@ jobs:
         ]
 
     steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: first
         run: |
           echo "Running Deploy!"
@@ -40,8 +44,6 @@ jobs:
         run: |
           echo "last"
 
-      # - name: Checkout
-      #   uses: actions/checkout@v3
 
       # - name: Setup Mambaforge
       #   uses: conda-incubator/setup-miniconda@v2

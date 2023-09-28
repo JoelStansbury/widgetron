@@ -1,6 +1,6 @@
 name: Build
 env:
-  RUN_DEPLOY: true
+  RUN_DEPLOY: false
 
 on:
   push:

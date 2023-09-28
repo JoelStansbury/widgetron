@@ -19,14 +19,6 @@ dry_run:
     default: false
     help: "Do not run any commands (e.g. copy, move, ...). Just print them to widgetron_temp_files/commands.txt."
 
-author:
-    default: "Widgetron Contributors"
-    help: "Name of the Author."
-
-description:
-    default: "Widgetron application"
-    help: "This is the description provided to electron/node_package.json."
-
 python_version:
     flag: "-py"
     default: "auto"
@@ -100,14 +92,6 @@ environment_yaml:
         installer will build directly from this env.
         This option is useful for debugging as you can test it with...
         `conda activate widgetron_temp_files/.env && python -m widgetron_app`
-
-python_source:
-    flag: "-src"
-    help: |
-        This is a shortcut to avoid needing to build a conda package for your source code.
-        Widgetron is basically a big jinja template, if your notebook has `from my_package import my_widget`
-        then you would pass C:/path/to/my_package, and the directory will by copied recursively
-        into a package shell immediately next to the notebook.
 
 server_command:
     nargs: "+"

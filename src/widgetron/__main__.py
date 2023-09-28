@@ -222,25 +222,6 @@ def parse_arguments():
     return kwargs
 
 
-def copy_source_code(kwargs):
-    # Copy python source into template package
-    # notebook dir already exists due to debug notebook
-    dest = kwargs["temp_files"] / "server/widgetron_app/notebooks"
-    # TODO: alter dest if kwargs["notebook"] is a directory
-
-    if "python_source" in kwargs:
-        if Path(kwargs["python_source"]).is_dir():
-            dest = dest / Path(kwargs["python_source"]).stem
-            if dest.exists():
-                shutil.rmtree(dest)
-            copytree(kwargs["python_source"], dest)
-        elif Path(kwargs["python_source"]).is_file():
-            copy(
-                kwargs["python_source"],
-                dest,
-            )
-
-
 def copy_notebook(kwargs):
     # Copy notebook into template
     # Check filetype
@@ -398,7 +379,6 @@ def cli():
 
     render_templates(**kwargs)
 
-    copy_source_code(kwargs)
     copy_notebook(kwargs)
     copy_icon(kwargs)
 

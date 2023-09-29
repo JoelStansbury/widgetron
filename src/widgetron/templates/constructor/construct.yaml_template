@@ -20,8 +20,10 @@ post_install: post_install.sh  # [not win]
 register_python_default: false
 icon_image: "../recipe/{{icon_name}}"
 channels_remap:
-  - src: {{ channels[0] }}
-    dest: https://conda.anaconda.org/conda-forge
+{%- for local in local_channels %}
+  - src: {{ local }}
+    dest: {{ non_local_channels[0] }}
+{%- endfor %}
 
 {%- for key, value in constructor_params.items() %}
 {{key}}: {{value}}

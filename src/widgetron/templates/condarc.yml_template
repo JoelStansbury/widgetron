@@ -1,0 +1,22 @@
+add_pip_as_python_dependency: False
+always_yes: True
+auto_update_conda: False
+channels:
+{%- for c in channels %}
+  - {{c}}
+{%- endfor %}
+custom_multichannels:
+default_channels: []
+local_repodata_ttl: 99999 # also seconds, default is 1
+notify_outdated_conda: False
+remote_connect_timeout_secs: 600 # default is 9.15
+remote_max_retries: 10 # default is 3
+remote_read_timeout_secs: 600 # default is 60
+repodata_fns: [repodata.json]
+show_channel_urls: True
+show_sources: True
+unsatisfiable_hints_check_depth: 0
+conda-build:
+  no_verify: true
+  pkg_format: 2
+  zstd_compression_level: 21

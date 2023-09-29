@@ -1,6 +1,4 @@
 name: Build
-env:
-  RUN_DEPLOY: false
 
 on:
   push:
@@ -49,7 +47,6 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
 
       - name: Test Widgetron
-        if: vars.RUN_DEPLOY
         run: |
           python -m pip install . --no-build-isolation
           widgetron -h
@@ -59,7 +56,6 @@ jobs:
           sh output/single_notebook_installer -b -p ~/single_notebook
 
       - name: Upload Installer
-        if: vars.RUN_DEPLOY
         uses: actions/upload-artifact@v3
         with:
           name: linux_installer

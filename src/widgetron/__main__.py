@@ -36,6 +36,7 @@ CONSTRUCTOR = shutil.which("constructor")
 WIN = platform.system() == "Windows"
 LINUX = platform.system() == "Linux"
 OSX = platform.system() == "Darwin"
+CONDA_ENV = {}  # once condarc is created, it will be added to this env
 
 assert NPM, f"Missing dependencies (npm)"
 assert CONDA, "Could not find conda"
@@ -91,8 +92,8 @@ def _is_installed(env, library):
     return bool(json.loads(output))
 
 
-def _install_missing_pkgs(env, pkgs) -> int:
-    cmd = [CONDA, "install", "--prefix", str(env), "-y", *pkgs, "-c", "conda-forge"]
+def _install_missing_pkgs(env, pkgs, channels) -> int:
+    cmd = [CONDA, "install", "--prefix", str(env), "-y", *pkgs, "-c", *channels]
     return call(cmd)
 
 
@@ -102,6 +103,10 @@ def parse_arguments():
     kwargs["channels"] = kwargs.get(
         "channels", ["https://conda.anaconda.org/conda-forge"]
     )
+    kwargs["local_channels"] = [x for x in kwargs["channels"] if x.startswith("file:")]
+    kwargs["non_local_channels"] = [x for x in kwargs["channels"] if not x.startswith("file:")]
+
+    assert isinstance(kwargs["channels"], list), f"Channels should be a list. Not ({type(kwargs['channels'])})"
     if kwargs["python_version"] == "auto":
         kwargs["python_version"] = ".".join(list(map(str, sys.version_info[:2])))
     if isinstance(kwargs["dependencies"], str):
@@ -203,7 +208,7 @@ def parse_arguments():
                 f"Would you like to install them to {env} from conda-forge (y/n)? "
             )
             if inp.lower() in ["y", "yes"]:
-                _install_missing_pkgs(env, missing_pkgs)
+                _install_missing_pkgs(env, missing_pkgs, kwargs["channels"])
             else:
                 sys.exit()
 
@@ -218,6 +223,7 @@ def parse_arguments():
     else:
         kwargs["pkg_output_dir"] = Path(kwargs["pkg_output_dir"]).absolute()
     kwargs["channels"] = [kwargs["pkg_output_dir"].as_uri(), *kwargs["channels"]]
+    kwargs["local_channels"].append(kwargs["pkg_output_dir"].as_uri())
     return kwargs
 
 
@@ -322,9 +328,9 @@ def get_conda_build_env(kwargs) -> dict[str, str]:
     if not SETTINGS["DRY_RUN"]:
         sdist = next((kwargs["temp_files"] / "server/dist").glob("*.tar.gz"))
         env.update(
-            SDIST_URL=sdist.as_uri(), SDIST_SHA256=sha256(sdist.read_bytes()).hexdigest()
+            SDIST_URL=sdist.as_uri(), SDIST_SHA256=sha256(sdist.read_bytes()).hexdigest(),
+            CONDARC = kwargs["CONDARC"],
         )
-
     return env
 
 
@@ -367,14 +373,17 @@ def build_conda_package(kwargs) -> int:
 
 def build_installer(kwargs):
     dir = kwargs["temp_files"] / "constructor"
+    env = dict(**os.environ)
+    env.update(CONDARC = kwargs["CONDARC"])
     cmd = [CONSTRUCTOR, str(dir), "--output-dir", str(kwargs["outdir"])]
-    return call(cmd)
+    return call(cmd, env=env)
 
 
 def cli():
     kwargs = parse_arguments()
 
     render_templates(**kwargs)
+    kwargs["CONDARC"] = str(kwargs["temp_files"] / "condarc.yml")
 
     copy_notebook(kwargs)
     copy_icon(kwargs)

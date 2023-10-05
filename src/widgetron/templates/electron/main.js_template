@@ -52,6 +52,7 @@ app.on('web-contents-created', (event, contents) => {
 
 app.whenReady().then(() => {
   let opts = {
+    title: "{{name}}",
     autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: false,
@@ -71,4 +72,8 @@ app.whenReady().then(() => {
     e.preventDefault();
     win.destroy();
   });
+
+  win.on('page-title-updated', function (e) {
+    e.preventDefault();
+  })
 })

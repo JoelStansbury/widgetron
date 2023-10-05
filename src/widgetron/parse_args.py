@@ -83,9 +83,3 @@ def config():
     res["outdir"].mkdir(exist_ok=True)
 
     return res
-
-
-CONFIG = config()
-
-if __name__ == "__main__":
-    print(CONFIG)

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List
 import traitlets as T
@@ -5,8 +6,10 @@ import yaml
 
 import constructor
 
-from ..constants import DEFAULT_ICON, REQUIRED_PKGS, TEMP_DIR
-from .conda import is_lock_file, is_installed, install, is_local_channel, validate_local_channel, format_local_channel, add_package
+from widgetron.utils.shell import SHELL
+
+from ..constants import DEFAULT_ICON, REQUIRED_PKGS, TEMP_DIR, WIN
+from .conda import explicit_url, is_lock_file, is_installed, install, is_local_channel, validate_local_channel, format_local_channel, add_package
 
 
 
@@ -25,11 +28,15 @@ class Shared(T.HasTraits):
 
 class ConstructorSettings(T.HasTraits):
     install_missing: bool = T.Bool(False)
+    path: Path = TEMP_DIR / "constructor"
+    environment_yaml: str = T.Unicode()
+    explicit_lock: str = T.Unicode()
+    install_path: str = T.Unicode()
 
     name: str = T.Unicode()
     version: str = T.Unicode()
-    channels: tuple[str] = T.Tuple(["conda-forge"])
-    dependencies: tuple[str] = T.Tuple()
+    channels: tuple[str] = T.Tuple(["https://conda.anaconda.org/conda-forge"])
+    specs: tuple[str] = T.Tuple()
     channels_remap: tuple[dict[str, str]] = T.Tuple()
     environment_file: str | None = T.Unicode(None, allow_none=True)
 
@@ -42,6 +49,9 @@ class ConstructorSettings(T.HasTraits):
     default_prefix: str | None = T.Unicode(None, allow_none=True)
     default_prefix_domain_user: str | None = T.Unicode(None, allow_none=True)
     default_prefix_all_users: str | None = T.Unicode(None, allow_none=True)
+    register_python_default: bool = T.Bool(False)
+    post_install: str = T.Unicode("post_install.sh  # [not win]")
+    icon_image: str | None = T.Unicode(None, allow_none=True)
 
     # Paths relative to construct.yaml
     environment: str | None = T.Unicode(None, allow_none=True)
@@ -53,7 +63,13 @@ class ConstructorSettings(T.HasTraits):
     _non_local_channels: List[str] = T.Tuple()
 
     def __init__(self, **kw):
-        super().__init__(**{k: v for k, v in kw.items() if hasattr(self, k)})
+        if "icon" in kw:
+            kw["icon_image"] = kw["icon"]
+        kw["specs"] = kw.get("dependencies", [])
+        self.path.mkdir(parents=True, exist_ok=True)
+        super().__init__(**{k: v for k, v in kw.items() if k in self.trait_names()})
+        self.render()
+        self.observe(self.render, names=self.trait_names())
 
     @T.validate("channels")
     def _on_channels_changed(self, proposal:T.Bunch) -> None:
@@ -65,20 +81,21 @@ class ConstructorSettings(T.HasTraits):
                 channels.append(c)
         
         self._local_channels = [x for x in channels if is_local_channel(x)]
-        self._non_local_channels = [x for x in channels if not is_local_channel(x)]
+        self._non_local_channels = [x for x in channels if not is_local_channel(x)] or ["conda-forge"]
         channels = [*self._local_channels, *self._non_local_channels]
-        # for x in self._local_channels:
-        #     validate_local_channel(x)
-        self.channels_remap = [{"src":c, "dest": self._non_local_channels[0]} for c in self._local_channels]
+        for x in self._local_channels:
+            validate_local_channel(x)
+        self.channels_remap = [{"src":c, "dest": "https://repo.anaconda.com/pkgs/main"} for c in self._local_channels]
         return channels
 
     def add_local(self, path: Path | str):
         self.channels = (format_local_channel(path), *self.channels)
 
-    @T.observe("dependencies")
-    def _validate_dependencies(self, e:T.Bunch) -> None:
-        for pkg, _ in REQUIRED_PKGS:
-            assert any([pkg in x.split() for x in self.dependencies]), f"Required package ({pkg}) not found in specified dependencies."
+    @T.observe("specs")
+    def _validate_specs(self, e:T.Bunch) -> None:
+        if self.specs:
+            for pkg, _ in REQUIRED_PKGS:
+                assert any([pkg in x.split() for x in self.specs]), f"Required package ({pkg}) not found in specified specs."
     
     @T.observe("environment")
     def _validate_environment(self, e:T.Bunch) -> None:
@@ -89,41 +106,83 @@ class ConstructorSettings(T.HasTraits):
         else:
             assert not missing_packages, f"Environment is missing the following required packages ({missing_packages})"
  
-    @T.validate("environment_file")
-    def _on_env_yaml(self, proposal:T.Bunch) -> None:
-        filename = Path(proposal["value"])
-        spec = filename.read_text()
-        
-        if is_lock_file(content=spec):
-            assert constructor.__version__ >= "3.4.5", f"Support for explicit lockfiles was added in constructor=3.4.5. You have constructor={constructor.__version__}"
+    @T.validate("install_path")
+    def _validate_install_path(self, proposal:T.Bunch):
+        value = proposal.value
+        if WIN:
+            value = "\\".join(Path(value).parts)
+        self.default_prefix = value
+        self.default_prefix_all_users = value
+        self.default_prefix_domain_user = value
+        return value
 
-        new_path = TEMP_DIR / "constructor" / filename.name
-        new_path.write_text(spec)
-        return str(new_path)
+    @T.validate("environment_file")
+    def _on_env_file(self, proposal:T.Bunch) -> None:
+        if self.environment_yaml:
+            assert Path(proposal.value).name == Path(self.environment_yaml).name, "Conflicting spec files (you may only have one)"
+            SHELL.copy(self.environment_yaml, proposal.value)
+            return proposal.value
+        if self.explicit_lock:
+            assert Path(proposal.value).name == Path(self.explicit_lock).name, "Conflicting spec files (you may only have one)"
+            SHELL.copy(self.explicit_lock, proposal.value)
+            return proposal.value
+        raise ValueError(
+            "You may not set environment_file directly. Use `environment_yaml` or `explicit_lock` instead."
+        )
+    
+    @T.observe("environment_yaml")
+    def _on_env_yaml(self, e:T.Bunch) -> None:
+        data = yaml.safe_load(Path(self.environment_yaml).read_text())
+        self.channels = data["channels"]
+        self.specs = data["dependencies"]
+        # self.environment_file = str(self.path / Path(self.environment_yaml).name)
+
+    @T.observe("explicit_lock")
+    def _on_env_lock(self, e:T.Bunch) -> None:
+        assert constructor.__version__ >= "3.4.5", (
+            "Support for explicit lockfiles was added in constructor=3.4.5. "
+            f"You have constructor={constructor.__version__}"
+        )
+        assert is_lock_file(self.explicit_lock), "Not a valid lock file."
+        self.environment_file = str(self.path / Path(self.explicit_lock).name)
 
     def add_dependency(self, package, channel, **package_attrs):
         if is_local_channel(channel):
             channel = format_local_channel(channel)
-        if channel not in self.channels:
-            self.channels = (*self.channels, channel)
+        self.channels = (*self.channels, channel)
+        if self.specs:
+            url = explicit_url(package, channel, **package_attrs)
+            self.specs = (*self.specs, url)
         if self.environment_file:
             f = Path(self.environment_file)
-            f.write_text(add_package(f.read_text, package, channel))
+            #: re-write the env_file (spec or lock) with the new package
+            f.write_text(add_package(f.read_text(), package, channel))
             return
-        if "version" in package_attrs:
-            package = f"{package} ={package_attrs['version']}"
-        self.dependencies = (*self.dependencies, package)
 
-    @T.validate("nsis_template", "header_image", "welcome_image", "environment")
+    @T.validate("icon_image", "nsis_template", "header_image", "welcome_image", "environment", "environment_yaml", "explicit_lock", "environment_file")
     def _make_absolute(self, proposal:T.Bunch):
         p = Path(proposal["value"])
         assert p.exists()
         return str(p.absolute())
 
-    def to_yaml(self):
-        omit = {"_local_channels", "_non_local_channels", "install_missing"}
-        d = {k:v for k,v in self.trait_values().items() if v and k not in omit}
-        return yaml.safe_dump(d)
+    def render(self, *_):
+        omit = {
+            "_local_channels", 
+            "_non_local_channels", 
+            "install_missing", 
+            "path", 
+            "environment_yaml", 
+            "explicit_lock",
+            "install_path",
+        }.union({"channels", "specs"} if self.environment_file else set())
+        d = {k:v for k,v in self.trait_values().items() if v not in (None, "", [], tuple()) and k not in omit}
+        yml = yaml.safe_dump(d)
+        self.path.mkdir(parents=True, exist_ok=True)
+        (self.path / "construct.yaml").write_text(yml)
+    
+    def validate(self):
+        assert self.environment or self.environment_file or (self.specs and self.channels), "Missing environment specification"
+
 
 
 class ElectronSettings(T.HasTraits):

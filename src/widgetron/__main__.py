@@ -13,6 +13,7 @@ from .globals import CONSTRUCTOR_PARAMS
 from .utils.shell import SHELL
 from .utils.jinja_functions import render_templates
 from .utils.conda import is_installed
+from .utils.settings import ConstructorSettings
 
 
 def parse_arguments():
@@ -56,9 +57,11 @@ def parse_arguments():
 
     kwargs["pkg_output_dir"] = kwargs.get("pkg_output_dir", DEFAULT_BLD)
     kwargs["temp_files"] = TEMP_DIR
-    CONSTRUCTOR_PARAMS.channels = (format_local_channel(kwargs["pkg_output_dir"]), *CONSTRUCTOR_PARAMS.channels)
     CONSTRUCTOR_PARAMS.name = kwargs["name"]
-    CONSTRUCTOR_PARAMS.name = kwargs["version"]
+    CONSTRUCTOR_PARAMS.version = kwargs["version"]
+    CONSTRUCTOR_PARAMS.path = (TEMP_DIR / "constructor").absolute()
+    CONSTRUCTOR_PARAMS.validate()
+    
     return kwargs
 
 
@@ -174,6 +177,10 @@ def build_conda_package(kwargs) -> int:
         get_conda_build_args(Path(dir), kwargs["pkg_output_dir"]),
         env=get_conda_build_env(kwargs),
     )
+    CONSTRUCTOR_PARAMS.add_dependency(
+        package="widgetron_app",
+        channel=kwargs["pkg_output_dir"],
+    )
 
     if (not rc) and "environment" in kwargs:
         # TODO: move this to a better function
@@ -213,7 +220,6 @@ def build_installer(kwargs):
 
 def cli():
     kwargs = parse_arguments()
-    kwargs["constructor_yaml"] = CONSTRUCTOR_PARAMS.to_yaml()
 
     render_templates(**kwargs)
 

@@ -68,19 +68,14 @@ def add_package(env_file_contents: str, package:str, channel:str, **package_attr
         if package not in data["dependencies"]:
             data["dependencies"].append(package)
         if channel not in data["channels"]:
-            data["channels"].append(channel)
+            data["channels"] = [channel, *data["channels"]]
         return yaml.safe_dump(data)
 
 
 def is_lock_file(filename=None, content=None):
     content = content or Path(filename).read_text()
     l = [x.strip() for x in content[:150].split("\n")]
-    return (
-        l[0] == "# This file may be used to create an environment using:" and
-        l[1] == "# $ conda create --name <env> --file <this file>" and
-        l[2].startswith("# platform: ") and
-        l[3] == "@EXPLICIT"
-    )
+    return "@EXPLICIT" in l
 
 
 def explicit_url(package: str, channel: str, **package_attrs):
@@ -110,4 +105,5 @@ def explicit_url(package: str, channel: str, **package_attrs):
     if package_attrs:
         for k,v in package_attrs.items():
             info["package"] = [x for x in info["package"] if x[k] == v]
-    return info['widgetron_app'][0]['url']
+    pkg = info[package][0]
+    return f"{pkg['url']}#{pkg['md5']}"

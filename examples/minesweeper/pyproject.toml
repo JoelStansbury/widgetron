@@ -8,5 +8,6 @@ license_file = "LICENSE"
 installer_filename = "Minesweeper_Installer.exe"
 welcome_image = "assets/welcome_image.png"
 header_image_text = "header text"
+install_path = "c:/a/Minesweeper"
 # domain_whitelist = ["www.google.com", "github.com"]
 # url_whitelist = ["https://github.com/JoelStansbury/widgetron/"]

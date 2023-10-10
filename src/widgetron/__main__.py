@@ -5,7 +5,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from .utils.conda import format_local_channel
+from .utils.conda import format_local_channel, uninstall_widgetron
 
 from .globals import CONFIG
 from .constants import (
@@ -145,12 +145,6 @@ def package_electron_app(kwargs):
         SHELL.cd(cwd)
 
 
-def copy_icon(kwargs):
-    icon = Path(kwargs["icon"])
-    SHELL.copy(str(icon), TEMP_DIR / f"recipe/{icon.name}")
-    kwargs["icon_name"] = icon.name
-
-
 def get_conda_build_args(recipe_dir: Path, output_dir: Path) -> list[str]:
     cmd = [
         "boa",
@@ -189,6 +183,8 @@ def build_conda_package(kwargs) -> int:
         get_conda_build_args(Path(dir), kwargs["pkg_output_dir"]),
         env=get_conda_build_env(kwargs),
     )
+    if CONSTRUCTOR_PARAMS.environment:
+        uninstall_widgetron(CONSTRUCTOR_PARAMS.environment)
     CONSTRUCTOR_PARAMS.add_dependency(
         package="widgetron_app",
         channel=kwargs["pkg_output_dir"],
@@ -208,7 +204,6 @@ def cli():
     render_templates(**kwargs)
 
     copy_notebook(kwargs)
-    copy_icon(kwargs)
 
     if kwargs["template_only"]:
         sys.exit(0)

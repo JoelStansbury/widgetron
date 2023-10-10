@@ -11,22 +11,9 @@ from .shell import SHELL
 
 
 def is_installed(env: Path | str, library: str) -> bool:
-    return bool(
-        json.loads(
-            SHELL.check_output(
-                [
-                    CONDA,
-                    "list",
-                    "--prefix",
-                    str(env),
-                    "-f",
-                    library,
-                    "--no-pip",
-                    "--json",
-                ]
-            )
-        )
-    )
+    prefix = Path(env)
+    meta = prefix / "conda-meta"
+    return len(list(meta.glob(f"{library}*.json"))) > 0
 
 
 def install_many(
@@ -48,9 +35,7 @@ def install_many(
 
 
 def install_one(env, package: str, channel: str, **package_attrs) -> int:
-    url = explicit_url(package, channel, **package_attrs)
-    channels = [channels] if isinstance(channels, str) else channels
-    pkgs: list[str] = [f"{p} {v}" if v else p for p, v in pkgs]
+    url = explicit_url(package, channel, with_hash=False, **package_attrs)
     cmd = [
         CONDA,
         "install",
@@ -63,26 +48,24 @@ def install_one(env, package: str, channel: str, **package_attrs) -> int:
     return SHELL.call(cmd)
 
 
-def ensure_not_installed(env: Path | str, library: str) -> int:
-    if is_installed(env, library):
-        if WIN:
-            msg = f"""
-                Found existing installation of {library} in {env}.
-                On windows this may prompt for admin privleges in order to remove any shortcuts that
-                could exist (this may cause timeout errors on CI).
-                This may happen locally if you try to build multiple time.
-            """
-            warn(msg)
-        return SHELL.call(
-            [
-                CONDA,
-                "remove",
-                "--prefix",
-                str(env),
-                library,
-                "-y",
-            ]
-        )
+def uninstall_widgetron(env: str | Path):
+    """
+    Manually remove all files associated with the currently installed
+    widgetron_app package.
+    This will only be run if the following conditions are met.
+    - widgetron is building off of a pre-build environment
+    - widgetron has already been run at least once before,
+      such that a package called "widgetron_app" is present in that environment
+    """
+    prefix = Path(env)
+    meta = prefix / "conda-meta"
+    for metafile in meta.glob(f"widgetron_app*.json"):
+        metadata = json.loads(metafile.read_text())
+        for pkg_file in metadata["files"]:
+            print(f"Deleting: {pkg_file}")
+            pkg_file = prefix / pkg_file
+            pkg_file.unlink()
+        metafile.unlink()
 
 
 def is_local_channel(x: str | Path) -> bool:
@@ -176,7 +159,7 @@ def find_env(env: str) -> str:
     return matches[0]
 
 
-def explicit_url(package: str, channel: str, **package_attrs):
+def explicit_url(package: str, channel: str, with_hash=True, **package_attrs):
     """
     package_attrs:
         'arch',
@@ -206,4 +189,6 @@ def explicit_url(package: str, channel: str, **package_attrs):
         for k, v in package_attrs.items():
             info["package"] = [x for x in info["package"] if x[k] == v]
     pkg = info[package][0]
-    return f"{pkg['url']}#{pkg['md5']}"
+    if with_hash:
+        return f"{pkg['url']}#{pkg['md5']}"
+    return pkg["url"]

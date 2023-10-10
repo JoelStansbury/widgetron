@@ -7,11 +7,10 @@ import yaml
 
 from widgetron.utils.shell import SHELL
 
-from ..constants import REQUIRED_PKGS, TEMP_DIR, WIN
+from ..constants import REQUIRED_PKGS, TEMP_DIR, WIN, DEFAULT_ICON
 from .conda import (
     add_package_to_lock,
     add_package_to_yaml,
-    ensure_not_installed,
     explicit_url,
     find_env,
     format_local_channel,
@@ -50,6 +49,12 @@ class ConstructorSettings(T.HasTraits):
     default_prefix_all_users: str | None = T.Unicode(None, allow_none=True)
     register_python_default: bool = T.Bool(False)
     post_install: str = T.Unicode("post_install.sh  # [not win]")
+    extra_files: list = T.List(
+        default_value=[
+            {"Menu/icon.ico": "Menu/icon.ico"},
+            {"Menu/widgetron_shortcut.json": "Menu/widgetron_shortcut.json"},
+        ]
+    )
     icon_image: str | None = T.Unicode(None, allow_none=True)
 
     # Paths relative to construct.yaml
@@ -61,8 +66,7 @@ class ConstructorSettings(T.HasTraits):
     _non_local_channels: List[str] = T.Tuple()
 
     def __init__(self, **kw):
-        if "icon" in kw:
-            kw["icon_image"] = kw["icon"]
+        kw["icon_image"] = kw.get("icon", str(DEFAULT_ICON))
         kw["specs"] = kw.get("dependencies", [])
         self.path.mkdir(parents=True, exist_ok=True)
         super().__init__(**{k: v for k, v in kw.items() if k in self.trait_names()})
@@ -119,7 +123,7 @@ class ConstructorSettings(T.HasTraits):
     def _validate_install_path(self, proposal: T.Bunch):
         value = proposal.value
         if WIN:
-            value = "\\".join(Path(value).parts)
+            value = str(Path(value)).replace("\\\\", "\\")
         #: Set if not explicitly provided
         self.default_prefix = self.default_prefix or value
         self.default_prefix_all_users = self.default_prefix_all_users or value
@@ -129,20 +133,25 @@ class ConstructorSettings(T.HasTraits):
     @T.validate("environment_file")
     def _on_env_file(self, proposal: T.Bunch) -> None:
         if self.environment_yaml:
-            assert (
-                Path(proposal.value).name == Path(self.environment_yaml).name
-            ), "Conflicting spec files (you may only have one)"
-            SHELL.copy(self.environment_yaml, proposal.value)
             return proposal.value
         if self.explicit_lock:
-            assert (
-                Path(proposal.value).name == Path(self.explicit_lock).name
-            ), "Conflicting spec files (you may only have one)"
-            SHELL.copy(self.explicit_lock, proposal.value)
             return proposal.value
         raise ValueError(
             "You may not set environment_file directly. Use `environment_yaml` or `explicit_lock` instead."
         )
+
+    @T.validate("icon_image")
+    def _on_icon_change(self, e: T.Bunch) -> None:
+        (self.path / "Menu").mkdir(parents=True, exist_ok=True)
+        SHELL.copy(self.icon_image, self.path / "Menu/icon.ico")
+        SHELL.copy(self.icon_image, self.path / "icon.ico")
+        return "icon.ico"
+
+    @T.validate("extra_files")
+    def _on_extra_files(self, proposal: T.Bunch) -> dict:
+        new = self.extra_files
+        new.update(**proposal.value)
+        return new
 
     @T.observe("environment_yaml")
     def _on_env_yaml(self, e: T.Bunch) -> None:
@@ -161,7 +170,10 @@ class ConstructorSettings(T.HasTraits):
             f"You have constructor={constructor.__version__}"
         )
         assert is_lock_file(self.explicit_lock), "Not a valid lock file."
-        self.environment_file = str(self.path / Path(self.explicit_lock).name)
+        self.environment_file = str(
+            (self.path / Path(self.explicit_lock).name).with_suffix(".txt")
+        )
+        Path(self.environment_file).write_text(Path(self.explicit_lock).read_text())
 
     def add_dependency(self, package, channel, **package_attrs):
         if is_local_channel(channel):
@@ -196,10 +208,7 @@ class ConstructorSettings(T.HasTraits):
             )
             return 0
         if self.environment:
-            rc = ensure_not_installed(self.environment, package)
-            return rc or install_one(
-                self.environment, package, channel, **package_attrs
-            )
+            return install_one(self.environment, package, channel, **package_attrs)
         raise ValueError(
             "No suitable environment specification identified. This should never happen. Please report this to https://github.com/JoelStansbury/widgetron/issues"
         )

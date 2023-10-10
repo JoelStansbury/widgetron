@@ -1,10 +1,6 @@
-
-from pathlib import Path
 from .parse_args import config
-from .utils.settings import ConstructorSettings, ElectronSettings
+from .utils.settings import ConstructorSettings
 
 CONFIG = config()
 
 CONSTRUCTOR_PARAMS = ConstructorSettings(**CONFIG)
-
-ELECTRON_PARAMS = ElectronSettings(CONFIG)

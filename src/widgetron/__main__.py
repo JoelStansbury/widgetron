@@ -8,7 +8,18 @@ from pathlib import Path
 from .utils.conda import format_local_channel
 
 from .globals import CONFIG
-from .constants import CONSTRUCTOR, CONDA, TEMP_DIR, WIN, LINUX, OSX, NPM, DEFAULT_BLD, DEFAULT_SERVER_COMMAND, DEFAULT_ICON
+from .constants import (
+    CONSTRUCTOR,
+    CONDA,
+    TEMP_DIR,
+    WIN,
+    LINUX,
+    OSX,
+    NPM,
+    DEFAULT_BLD,
+    DEFAULT_SERVER_COMMAND,
+    DEFAULT_ICON,
+)
 from .globals import CONSTRUCTOR_PARAMS
 from .utils.shell import SHELL
 from .utils.jinja_functions import render_templates
@@ -23,7 +34,7 @@ def parse_arguments():
         kwargs["python_version"] = ".".join(list(map(str, sys.version_info[:2])))
     if kwargs["license_file"]:
         kwargs["license_file"] = str(Path(kwargs["license_file"]).absolute())
-    
+
     SHELL.mock = kwargs["dry_run"]
     SHELL.log = TEMP_DIR / "shell_commands.txt"
 
@@ -61,7 +72,7 @@ def parse_arguments():
     CONSTRUCTOR_PARAMS.version = kwargs["version"]
     CONSTRUCTOR_PARAMS.path = (TEMP_DIR / "constructor").absolute()
     CONSTRUCTOR_PARAMS.validate()
-    
+
     return kwargs
 
 
@@ -165,7 +176,8 @@ def get_conda_build_env(kwargs) -> dict[str, str]:
     if not SHELL.mock:
         sdist = next((TEMP_DIR / "server/dist").glob("*.tar.gz"))
         env.update(
-            SDIST_URL=sdist.as_uri(), SDIST_SHA256=sha256(sdist.read_bytes()).hexdigest()
+            SDIST_URL=sdist.as_uri(),
+            SDIST_SHA256=sha256(sdist.read_bytes()).hexdigest(),
         )
 
     return env
@@ -181,34 +193,6 @@ def build_conda_package(kwargs) -> int:
         package="widgetron_app",
         channel=kwargs["pkg_output_dir"],
     )
-
-    if (not rc) and "environment" in kwargs:
-        # TODO: move this to a better function
-        if is_installed(kwargs["environment"], "widgetron_app"):
-            SHELL.call(
-                [
-                    CONDA,
-                    "remove",
-                    "--prefix",
-                    str(kwargs["environment"]),
-                    "widgetron_app",
-                    "-y",
-                ]
-            )
-        cmd = [
-            CONDA,
-            "install",
-            "--prefix",
-            str(kwargs["environment"]),
-            "widgetron_app",
-            "-y",
-            "-c",
-            kwargs["pkg_output_dir"].as_uri(),
-            *(["--no-shortcuts"] if WIN else []),
-            "--force-reinstall",
-        ]
-
-        rc = SHELL.call(cmd)
     return rc
 
 

@@ -22,7 +22,7 @@ OSX = platform.system() == "Darwin"
 REQUIRED_PKGS = [
     ("jupyterlab", ">=3"),
     ("conda", ">=22, <23"),
-    *([("menuinst", ">=1.4.17")] if WIN else [])
+    *([("menuinst", ">=1.4.17")] if WIN else []),
 ]
 
 if WIN:

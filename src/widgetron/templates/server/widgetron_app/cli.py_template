@@ -19,6 +19,16 @@ os.environ["JUPYTER_PREFER_ENVIRONMENT_OVER_USER"] = "1"
 #: Silence warning about frozen modules
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"]="1"
 
+NOTEBOOK_DIR = Path("notebooks") / FILENAME
+ENV = NOTEBOOK_DIR / "env"
+if NOTEBOOK_DIR.is_dir() and ENV.exists():
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(dotenv_path=str(ENV))
+    except Exception as e:
+        print(f"Cannot load env file as dotenv is not installed. {e}")
+
+
 SYS = platform.uname().system
 if SYS == "Windows":
     for z in HERE.glob("*.zip"):

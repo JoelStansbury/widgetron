@@ -61,6 +61,8 @@ def uninstall_widgetron(env: str | Path):
     meta = prefix / "conda-meta"
     for metafile in meta.glob(f"widgetron_app*.json"):
         metadata = json.loads(metafile.read_text())
+        print("Found existing install of widgetron_app... Removing")
+        print(metadata)
         for pkg_file in metadata["files"]:
             print(f"Deleting: {pkg_file}")
             pkg_file = prefix / pkg_file
@@ -184,7 +186,6 @@ def explicit_url(package: str, channel: str, with_hash=True, **package_attrs):
     info = json.loads(
         SHELL.check_output([CONDA, "search", "-c", channel, package, "--json"])
     )
-    print(info)
     if package_attrs:
         for k, v in package_attrs.items():
             info["package"] = [x for x in info["package"] if x[k] == v]

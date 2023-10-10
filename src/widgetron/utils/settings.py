@@ -155,20 +155,12 @@ class ConstructorSettings(T.HasTraits):
 
     @T.observe("environment_yaml")
     def _on_env_yaml(self, e: T.Bunch) -> None:
-        # data = yaml.safe_load(Path(self.environment_yaml).read_text())
-        # self.channels = data["channels"]
-        # self.specs = data["dependencies"]
-
-        env_cp = self.path / Path(self.environment_yaml).name
-        env_cp.write_text(Path(self.environment_yaml).read_text())
-        self.environment_file = str(env_cp.absolute())
+        data = yaml.safe_load(Path(self.environment_yaml).read_text())
+        self.channels = data["channels"]
+        self.specs = data["dependencies"]
 
     @T.observe("explicit_lock")
     def _on_env_lock(self, e: T.Bunch) -> None:
-        assert constructor.__version__ >= "3.4.5", (
-            "Support for explicit lockfiles was added in constructor=3.4.5. "
-            f"You have constructor={constructor.__version__}"
-        )
         assert is_lock_file(self.explicit_lock), "Not a valid lock file."
         self.environment_file = str(
             (self.path / Path(self.explicit_lock).name).with_suffix(".txt")
@@ -228,8 +220,10 @@ class ConstructorSettings(T.HasTraits):
     )
     def _ensure_file_exists(self, proposal: T.Bunch):
         p = Path(proposal["value"])
-        assert p.exists()
-        assert p.is_file()
+        if not p.exists():
+            raise ValueError(f"File not found: {p}")
+        if not p.is_file():
+            raise ValueError(f"Expected a file, not a directory: {p}")
         return str(p.absolute())
 
     def render(self, *_):

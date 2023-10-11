@@ -1,5 +1,6 @@
 import argparse
 import configparser
+import json
 import os
 from pathlib import Path
 
@@ -26,7 +27,12 @@ def config_file():
             setup_cfg.read_file(f)
         if "tool.widgetron" in setup_cfg:
             print("Initialize from setup.cfg")
-            return setup_cfg._sections["tool.widgetron"]
+            data = setup_cfg._sections["tool.widgetron"]
+            if "channels" in data:
+                data["channels"] = json.loads(data["channels"])
+            if "dependencies" in data:
+                data["dependencies"] = json.loads(data["dependencies"])
+
 
     if Path("pyproject.toml").is_file():
         _toml = tomllib.load(Path("pyproject.toml").open("rb"))

@@ -52,5 +52,5 @@ jobs:
         run: |
           python -m pip install . --no-build-isolation
           widgetron -h
-          widgetron examples/single_notebook
-          rm -r examples/single_notebook/widgetron_temp_files
+          cd examples/single_notebook
+          widgetron .

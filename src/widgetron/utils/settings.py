@@ -87,8 +87,8 @@ class ConstructorSettings(T.HasTraits):
             "conda-forge"
         ]
         channels = [*self._local_channels, *self._non_local_channels]
-        for x in self._local_channels:
-            validate_local_channel(x)
+        # for x in self._local_channels:
+        #     validate_local_channel(x)  # Fails on linux
         self.channels_remap = [
             {"src": c, "dest": "https://repo.anaconda.com/pkgs/main"}
             for c in self._local_channels

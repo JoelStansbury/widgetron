@@ -68,6 +68,7 @@ def parse_arguments():
 
     kwargs["pkg_output_dir"] = kwargs.get("pkg_output_dir", DEFAULT_BLD)
     kwargs["temp_files"] = TEMP_DIR
+
     CONSTRUCTOR_PARAMS.name = kwargs["name"]
     CONSTRUCTOR_PARAMS.version = kwargs["version"]
     CONSTRUCTOR_PARAMS.path = (TEMP_DIR / "constructor").absolute()
@@ -98,7 +99,8 @@ def copy_notebook(kwargs):
         if dest.exists():
             shutil.rmtree(dest)
         assert list(nb.glob("*.ipynb")), f"No notebooks found in {nb}"
-        SHELL.copytree(nb, dest)
+        ignore = [".ipynb_checkpoints", "__pycache__"]
+        SHELL.copytree(src=nb, dst=dest, ignore=shutil.ignore_patterns(*ignore))
 
 
 def package_electron_app(kwargs):

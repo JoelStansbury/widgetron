@@ -1,0 +1,12 @@
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\Menu\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\Menu\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\Menu\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\Menu\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\Menu\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\Menu\icon.ico
+cp c:\git\widgetron\src\widgetron\icons\widgetron.ico c:\git\widgetron\examples\single_notebook\widgetron_temp_files\constructor\icon.ico

@@ -155,6 +155,10 @@ class ConstructorSettings(T.HasTraits):
 
     @T.observe("environment_yaml")
     def _on_env_yaml(self, e: T.Bunch) -> None:
+        # NOTE: It should be possible to build off of the yaml file directly
+        #   but was running into issues with local channels not being handled
+        #   correctly.
+        # TODO: Run conda-lock and give the lockfile to constructor
         data = yaml.safe_load(Path(self.environment_yaml).read_text())
         self.channels = data["channels"]
         self.specs = data["dependencies"]
@@ -166,6 +170,10 @@ class ConstructorSettings(T.HasTraits):
             (self.path / Path(self.explicit_lock).name).with_suffix(".txt")
         )
         Path(self.environment_file).write_text(Path(self.explicit_lock).read_text())
+
+    @T.validate("name")
+    def _clean_name(self, proposal: T.Bunch) -> str:
+        return "_".join(proposal.value.split())
 
     def add_dependency(self, package, channel, **package_attrs):
         if is_local_channel(channel):

@@ -2,7 +2,6 @@ name: dev
 
 channels:
   - conda-forge
-  # - main  # Uncomment if using osx-arm64 install of python
 
 dependencies:
   - python <=3.11
@@ -10,3 +9,4 @@ dependencies:
   - conda
   - menuinst >=1.4.17
   - ipywidgets
+  - python-dotenv

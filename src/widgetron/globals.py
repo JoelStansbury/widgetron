@@ -5,6 +5,5 @@ from .utils.settings import ConstructorSettings
 CONFIG = config()
 
 CONSTRUCTOR_PARAMS = ConstructorSettings(
-    path=Path(CONFIG["temp_dir"]).resolve() / "constructor",
-    **CONFIG
+    path=Path(CONFIG["temp_dir"]).resolve() / "constructor", **CONFIG
 )

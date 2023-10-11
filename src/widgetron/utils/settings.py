@@ -30,7 +30,7 @@ class ConstructorSettings(T.HasTraits):
 
     name: str = T.Unicode()
     version: str = T.Unicode()
-    channels: tuple[str] = T.Tuple(["https://conda.anaconda.org/conda-forge"])
+    channels: tuple[str] = T.Tuple()
     specs: tuple[str] = T.Tuple()
     channels_remap: tuple[dict[str, str]] = T.Tuple()
     environment_file: str | None = T.Unicode(None, allow_none=True)

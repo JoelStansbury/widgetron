@@ -64,7 +64,9 @@ def parse_arguments():
     kwargs["filename"] = Path(kwargs["notebook"]).name
 
     kwargs["temp_dir"] = Path(kwargs.get("temp_dir", TEMP_DIR)).resolve()
-    kwargs["pkg_output_dir"] = str(kwargs.get("pkg_output_dir", kwargs["temp_dir"] / "conda-bld"))
+    kwargs["pkg_output_dir"] = str(
+        kwargs.get("pkg_output_dir", kwargs["temp_dir"] / "conda-bld")
+    )
 
     CONSTRUCTOR_PARAMS.name = kwargs["name"]
     CONSTRUCTOR_PARAMS.version = kwargs["version"]

@@ -156,6 +156,7 @@ def get_conda_build_args(recipe_dir: Path, output_dir: Path) -> list[str]:
         "--output-folder",
         str(output_dir),
         "--skip-existing",
+        "--debug",
     ]
 
     return cmd

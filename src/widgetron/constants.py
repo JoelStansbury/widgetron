@@ -6,8 +6,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 PYTHON = Path(sys.executable)
 CONDA_PREFIX = PYTHON.parent
-TEMP_DIR = Path("widgetron_temp_files").absolute()
-DEFAULT_BLD = TEMP_DIR / "conda_bld"
+TEMP_DIR = Path("widgetron_temp_files").resolve()
 DEFAULT_SERVER_COMMAND = ["jupyter", "lab", "--no-browser"]
 
 NPM = shutil.which("npm")
@@ -26,10 +25,10 @@ REQUIRED_PKGS = [
 ]
 
 if WIN:
-    DEFAULT_ICON = (HERE / "icons/widgetron.ico").absolute()
+    DEFAULT_ICON = (HERE / "icons/widgetron.ico").resolve()
 elif LINUX:
-    DEFAULT_ICON = (HERE / "icons/widgetron.png").absolute()
+    DEFAULT_ICON = (HERE / "icons/widgetron.png").resolve()
 elif OSX:
-    DEFAULT_ICON = (HERE / "icons/widgetron.icns").absolute()
+    DEFAULT_ICON = (HERE / "icons/widgetron.icns").resolve()
 else:
     raise OSError(f"Unknown platform {platform.system()}")

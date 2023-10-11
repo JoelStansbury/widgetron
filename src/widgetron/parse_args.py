@@ -58,9 +58,9 @@ def config():
     # Outdir
     #  If provided to CLI, then relative to CWD
     if kwargs.outdir is not None:
-        kwargs.outdir = Path(kwargs.outdir).absolute()
+        kwargs.outdir = Path(kwargs.outdir).resolve()
     #  If unspecified, then CWD
-    defaults["outdir"] = Path(defaults["outdir"]).absolute()
+    defaults["outdir"] = Path(defaults["outdir"]).resolve()
 
     # CD to the working directory
     working_dir = kwargs.directory or defaults["directory"]
@@ -71,7 +71,7 @@ def config():
 
     #  If outdir was specified in the config file, then it is relative to the config file
     if "outdir" in res:
-        res["outdir"] = Path(res["outdir"]).absolute()
+        res["outdir"] = Path(res["outdir"]).resolve()
 
     # Apply defaults as specified in args.yml
     for k, v in defaults.items():

@@ -5,7 +5,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from .utils.conda import format_local_channel, uninstall_widgetron
+from .utils.conda import uninstall_widgetron
 
 from .globals import CONFIG
 from .constants import (
@@ -16,15 +16,12 @@ from .constants import (
     LINUX,
     OSX,
     NPM,
-    DEFAULT_BLD,
     DEFAULT_SERVER_COMMAND,
     DEFAULT_ICON,
 )
 from .globals import CONSTRUCTOR_PARAMS
 from .utils.shell import SHELL
 from .utils.jinja_functions import render_templates
-from .utils.conda import is_installed
-from .utils.settings import ConstructorSettings
 
 
 def parse_arguments():
@@ -33,10 +30,10 @@ def parse_arguments():
     if kwargs["python_version"] == "auto":
         kwargs["python_version"] = ".".join(list(map(str, sys.version_info[:2])))
     if kwargs["license_file"]:
-        kwargs["license_file"] = str(Path(kwargs["license_file"]).absolute())
+        kwargs["license_file"] = str(Path(kwargs["license_file"]).resolve())
 
     SHELL.mock = kwargs["dry_run"]
-    SHELL.log = TEMP_DIR / "shell_commands.txt"
+    SHELL.log = kwargs.get("command_log", None)
 
     kwargs["server_command"] = kwargs.get("server_command", DEFAULT_SERVER_COMMAND)
     if isinstance(kwargs["server_command"], str):
@@ -66,12 +63,11 @@ def parse_arguments():
 
     kwargs["filename"] = Path(kwargs["notebook"]).name
 
-    kwargs["pkg_output_dir"] = kwargs.get("pkg_output_dir", DEFAULT_BLD)
-    kwargs["temp_files"] = TEMP_DIR
+    kwargs["temp_dir"] = Path(kwargs.get("temp_dir", TEMP_DIR)).resolve()
+    kwargs["pkg_output_dir"] = str(kwargs.get("pkg_output_dir", kwargs["temp_dir"] / "conda-bld"))
 
     CONSTRUCTOR_PARAMS.name = kwargs["name"]
     CONSTRUCTOR_PARAMS.version = kwargs["version"]
-    CONSTRUCTOR_PARAMS.path = (TEMP_DIR / "constructor").absolute()
     CONSTRUCTOR_PARAMS.validate()
 
     return kwargs
@@ -80,7 +76,7 @@ def parse_arguments():
 def copy_notebook(kwargs):
     # Copy notebook into template
     # Check filetype
-    server = TEMP_DIR / "server"
+    server = kwargs["temp_dir"] / "server"
     dest = server / "widgetron_app/notebooks"
     nb = Path(kwargs["notebook"])
 
@@ -104,10 +100,10 @@ def copy_notebook(kwargs):
 
 
 def package_electron_app(kwargs):
-    icon = Path(kwargs["icon"]).absolute()
-    cwd = Path().absolute()
+    icon = Path(kwargs["icon"]).resolve()
+    cwd = Path().resolve()
     try:
-        SHELL.cd(TEMP_DIR / "electron")
+        SHELL.cd(kwargs["temp_dir"] / "electron")
         Path("build").mkdir(exist_ok=True)
         # assert icon.suffix.lower() == ".png", "WIP: only png currently supported"
         SHELL.copy(str(icon), f"build/icon{icon.suffix}")
@@ -162,7 +158,7 @@ def get_conda_build_args(recipe_dir: Path, output_dir: Path) -> list[str]:
 
 
 def build_sdist_package(kwargs) -> int:
-    srcdir = TEMP_DIR / "server"
+    srcdir = kwargs["temp_dir"] / "server"
     cmd = ["python", "setup.py", "sdist"]
     return SHELL.call(cmd, cwd=str(srcdir))
 
@@ -170,7 +166,7 @@ def build_sdist_package(kwargs) -> int:
 def get_conda_build_env(kwargs) -> dict[str, str]:
     env = dict(**os.environ)
     if not SHELL.mock:
-        sdist = next((TEMP_DIR / "server/dist").glob("*.tar.gz"))
+        sdist = next((kwargs["temp_dir"] / "server/dist").glob("*.tar.gz"))
         env.update(
             SDIST_URL=sdist.as_uri(),
             SDIST_SHA256=sha256(sdist.read_bytes()).hexdigest(),
@@ -180,7 +176,7 @@ def get_conda_build_env(kwargs) -> dict[str, str]:
 
 
 def build_conda_package(kwargs) -> int:
-    dir = TEMP_DIR / "recipe"
+    dir = kwargs["temp_dir"] / "recipe"
     rc = SHELL.call(
         get_conda_build_args(Path(dir), kwargs["pkg_output_dir"]),
         env=get_conda_build_env(kwargs),
@@ -195,7 +191,7 @@ def build_conda_package(kwargs) -> int:
 
 
 def build_installer(kwargs):
-    dir = TEMP_DIR / "constructor"
+    dir = CONSTRUCTOR_PARAMS.path
     cmd = [CONSTRUCTOR, str(dir), "--output-dir", str(kwargs["outdir"])]
     return SHELL.call(cmd)
 

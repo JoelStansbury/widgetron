@@ -1,13 +1,12 @@
 from pathlib import Path
 from typing import List
 
-import constructor
 import traitlets as T
 import yaml
 
 from widgetron.utils.shell import SHELL
 
-from ..constants import REQUIRED_PKGS, TEMP_DIR, WIN, DEFAULT_ICON
+from ..constants import REQUIRED_PKGS, WIN, DEFAULT_ICON
 from .conda import (
     add_package_to_lock,
     add_package_to_yaml,
@@ -19,13 +18,12 @@ from .conda import (
     is_installed,
     is_local_channel,
     is_lock_file,
-    validate_local_channel,
 )
 
 
 class ConstructorSettings(T.HasTraits):
     install_missing: bool = T.Bool(False)
-    path: Path = TEMP_DIR / "constructor"
+    path: Path | None = T.Instance(Path, allow_none=True, default_value=None)
     environment_yaml: str = T.Unicode()
     explicit_lock: str = T.Unicode()
     install_path: str = T.Unicode()
@@ -48,7 +46,7 @@ class ConstructorSettings(T.HasTraits):
     default_prefix_domain_user: str | None = T.Unicode(None, allow_none=True)
     default_prefix_all_users: str | None = T.Unicode(None, allow_none=True)
     register_python_default: bool = T.Bool(False)
-    post_install: str = T.Unicode("post_install.sh  # [not win]")
+    post_install: str = T.Unicode(None, allow_none=True)
     extra_files: list = T.List(
         default_value=[
             {"Menu/icon.ico": "Menu/icon.ico"},
@@ -68,9 +66,7 @@ class ConstructorSettings(T.HasTraits):
     def __init__(self, **kw):
         kw["icon_image"] = kw.get("icon", str(DEFAULT_ICON))
         kw["specs"] = kw.get("dependencies", [])
-        self.path.mkdir(parents=True, exist_ok=True)
         super().__init__(**{k: v for k, v in kw.items() if k in self.trait_names()})
-        self.render()
         self.observe(self.render, names=self.trait_names())
 
     @T.validate("channels")
@@ -232,10 +228,13 @@ class ConstructorSettings(T.HasTraits):
             raise ValueError(f"File not found: {p}")
         if not p.is_file():
             raise ValueError(f"Expected a file, not a directory: {p}")
-        return str(p.absolute())
+        return str(p.resolve())
 
     def render(self, *_):
+        if not self.path:
+            return
         omit = {
+            "path",
             "_local_channels",
             "_non_local_channels",
             "install_missing",

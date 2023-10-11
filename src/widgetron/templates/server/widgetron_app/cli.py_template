@@ -92,11 +92,11 @@ def main():
 
     # open UI
     if SYS == "Darwin":
-        UI = ["open", "-W", str(HERE.absolute() / "widgetron.app"), "--env", f"widgetron_url={url}"]
+        UI = ["open", "-W", str(HERE.resolve() / "widgetron.app"), "--env", f"widgetron_url={url}"]
     if SYS == "Linux":
-        UI = str(next(HERE.rglob("widgetron")).absolute())
+        UI = str(next(HERE.rglob("widgetron")).resolve())
     if SYS == "Windows":
-        UI = str(next(HERE.rglob("widgetron.exe")).absolute())
+        UI = str(next(HERE.rglob("widgetron.exe")).resolve())
     
     subprocess.call(UI)
     server.stop()

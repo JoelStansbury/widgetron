@@ -100,7 +100,7 @@ def format_local_channel(x: str | Path) -> str:
         return "local"
     if str(x).startswith("file:"):
         return x
-    return Path(x).absolute().as_uri()
+    return Path(x).resolve().as_uri()
 
 
 def add_package_to_lock(
@@ -138,7 +138,7 @@ def is_lock_file(filename=None, content=None):
 
 def find_env(env: str) -> str:
     if Path(env).is_dir() and Path(env).exists():
-        return str(Path(env).absolute())
+        return str(Path(env).resolve())
     conda_config = json.loads(
         SHELL.check_output(["conda", "config", "--show", "--json"])
     )
@@ -147,7 +147,7 @@ def find_env(env: str) -> str:
         p = Path(envs_dir)
         matches += [str(p / x) for x in p.glob(env)]
 
-    env_as_prefix = str(Path(env).absolute())
+    env_as_prefix = str(Path(env).resolve())
     envs_dirs_str = "\n  ".join(conda_config["envs_dirs"])
     assert (
         matches

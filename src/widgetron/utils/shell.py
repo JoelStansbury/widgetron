@@ -7,12 +7,13 @@ import zipfile
 
 class Shell:
     def __init__(self, mock=False, log=None):
-        self.log = log or Path("shell_commands.txt")
+        self.log = log
         self.mock = mock
 
     def _log(self, msg):
-        with self.log.open(mode="a") as f:
-            f.write(msg)
+        if self.log:
+            with self.log.open(mode="a") as f:
+                f.write(msg)
 
     def call(self, cmd, **kw) -> int:
         self._log(" ".join([str(x) for x in cmd]) + "\n")

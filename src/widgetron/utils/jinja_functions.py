@@ -37,7 +37,7 @@ def render_templates(**kwargs):
     Renders all templates, replacing all instances of {{kw}} with the value
     provided in kwargs.
     """
-    outdir = kwargs["temp_files"]
+    outdir = kwargs["temp_dir"]
     outdir.mkdir(exist_ok=True)
     for f in TEMPLATES.rglob("*_template"):
         rel = f.relative_to(TEMPLATES)

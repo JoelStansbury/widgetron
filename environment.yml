@@ -9,3 +9,4 @@ dependencies:
   - nodejs >18, <19
   - python <=3.11
   - yaml
+  - traitlets >=5

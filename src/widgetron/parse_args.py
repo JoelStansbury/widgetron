@@ -1,5 +1,6 @@
 import argparse
 import configparser
+import json
 import os
 from pathlib import Path
 
@@ -26,7 +27,13 @@ def config_file():
             setup_cfg.read_file(f)
         if "tool.widgetron" in setup_cfg:
             print("Initialize from setup.cfg")
-            return setup_cfg._sections["tool.widgetron"]
+            data = setup_cfg._sections["tool.widgetron"]
+            if "channels" in data:
+                data["channels"] = json.loads(data["channels"])
+            if "dependencies" in data:
+                data["dependencies"] = json.loads(data["dependencies"])
+            return data
+
 
     if Path("pyproject.toml").is_file():
         _toml = tomllib.load(Path("pyproject.toml").open("rb"))
@@ -58,9 +65,12 @@ def config():
     # Outdir
     #  If provided to CLI, then relative to CWD
     if kwargs.outdir is not None:
-        kwargs.outdir = Path(kwargs.outdir).absolute()
+        kwargs.outdir = Path(kwargs.outdir).resolve()
+    if kwargs.temp_dir is not None:
+        kwargs.temp_dir = Path(kwargs.temp_dir).resolve()
     #  If unspecified, then CWD
-    defaults["outdir"] = Path(defaults["outdir"]).absolute()
+    defaults["outdir"] = Path(defaults["outdir"]).resolve()
+    defaults["temp_dir"] = Path(defaults["temp_dir"]).resolve()
 
     # CD to the working directory
     working_dir = kwargs.directory or defaults["directory"]
@@ -71,7 +81,9 @@ def config():
 
     #  If outdir was specified in the config file, then it is relative to the config file
     if "outdir" in res:
-        res["outdir"] = Path(res["outdir"]).absolute()
+        res["outdir"] = Path(res["outdir"]).resolve()
+    if "temp_dir" in res:
+        res["temp_dir"] = Path(res["temp_dir"]).resolve()
 
     # Apply defaults as specified in args.yml
     for k, v in defaults.items():
@@ -83,9 +95,3 @@ def config():
     res["outdir"].mkdir(exist_ok=True)
 
     return res
-
-
-CONFIG = config()
-
-if __name__ == "__main__":
-    print(CONFIG)

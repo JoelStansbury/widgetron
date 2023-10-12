@@ -1,8 +1,10 @@
 
 [tool.widgetron]
-notebook = "nb"
+notebook = "App Name"
 version = "0.1.0"
-environment = ".envs/dev"
-window_style = "Hidden"
+window_style = "Normal"
 outdir = "output"
 license_file = "LICENSE"
+install_path = "c:/WTronExamples/App_Name"
+explicit_lock = "conda-linux-64.lock"
+skip_sbom = true

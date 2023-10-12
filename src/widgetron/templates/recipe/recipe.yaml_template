@@ -8,6 +8,7 @@ source:
 
 build:
   string: 'py<< python_version.replace(".", "") >>_{{ environ.SDIST_SHA256[:7] }}'
+  script: python -m pip install --no-deps -vv --no-build-isolation .
   ignore_prefix_files:
     - Lib/site-packages/widgetron_app/*.zip
 

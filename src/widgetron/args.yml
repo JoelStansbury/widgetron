@@ -11,9 +11,17 @@ skip_sbom:
     default: false
     help: "If true, no sbom will be generated."
 
+temp_dir:
+    default: "./widgetron_temp_files"
+    help: "Where to put work files."
+
 template_only:
     default: false
     help: "Stop after rendering templates."
+
+command_log:
+    help: "Path to log file. When provided, will write all shell commands to a file for review. (sometimes useful for debugging)"
+
 
 dry_run:
     default: false

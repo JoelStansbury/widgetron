@@ -7,7 +7,7 @@
             "scriptarguments": [
                 "cmd.exe /c '${PREFIX}/Scripts/activate.bat && python -m widgetron_app'"
             ],
-            "icon": "${MENU_DIR}/{{icon_name}}"
+            "icon": "${MENU_DIR}/icon.ico"
         }
     ]
 }

@@ -6,5 +6,5 @@ window_style = "Normal"
 outdir = "output"
 license_file = "LICENSE"
 install_path = "c:/WTronExamples/App_Name"
-explicit_lock = "conda-win-64.lock"
+explicit_lock = "conda-linux-64.lock"
 skip_sbom = true

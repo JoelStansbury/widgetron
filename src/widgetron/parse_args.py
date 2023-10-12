@@ -32,6 +32,7 @@ def config_file():
                 data["channels"] = json.loads(data["channels"])
             if "dependencies" in data:
                 data["dependencies"] = json.loads(data["dependencies"])
+            return data
 
 
     if Path("pyproject.toml").is_file():

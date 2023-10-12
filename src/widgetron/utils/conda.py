@@ -6,7 +6,7 @@ from warnings import warn
 
 import yaml
 
-from ..constants import CONDA, WIN
+from ..constants import CONDA, WIN, JAKE
 from .shell import SHELL
 
 
@@ -108,9 +108,6 @@ def add_package_to_lock(
 ) -> str:
     filename = Path(filename)
     lock_str = filename.read_text()
-    assert is_lock_file(
-        content=lock_str
-    ), "Not a valid lock file. Missing '@EXPLICIT' line."
     url = explicit_url(package, channel, **package_attrs)
     filename.write_text(lock_str.rstrip() + f"\n{url}\n")
 
@@ -128,12 +125,6 @@ def add_package_to_yaml(
     if channel not in data["channels"]:
         data["channels"] = [channel, *data["channels"]]
     filename.write_text(yaml.safe_dump(data))
-
-
-def is_lock_file(filename=None, content=None):
-    content = content or Path(filename).read_text()
-    l = [x.strip() for x in content[:150].split("\n")]
-    return "@EXPLICIT" in l
 
 
 def find_env(env: str) -> str:
@@ -193,3 +184,7 @@ def explicit_url(package: str, channel: str, with_hash=True, **package_attrs):
     if with_hash:
         return f"{pkg['url']}#{pkg['md5']}"
     return pkg["url"]
+
+
+def create_sbom(lock_file: str|Path, out_file: str|Path):
+    SHELL.call([JAKE, "sbom", "-f", str(lock_file), "-o", str(out_file), "--output-format", "json", "-t", "CONDA"])

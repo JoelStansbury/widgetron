@@ -17,7 +17,6 @@ from .conda import (
     install_one,
     is_installed,
     is_local_channel,
-    is_lock_file,
 )
 
 
@@ -161,7 +160,6 @@ class ConstructorSettings(T.HasTraits):
 
     @T.observe("explicit_lock")
     def _on_env_lock(self, e: T.Bunch) -> None:
-        assert is_lock_file(self.explicit_lock), "Not a valid lock file."
         self.environment_file = str(
             (self.path / Path(self.explicit_lock).name).with_suffix(".txt")
         )

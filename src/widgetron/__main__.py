@@ -5,7 +5,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from .utils.conda import uninstall_widgetron
+from .utils.conda import uninstall_widgetron, create_sbom
 
 from .globals import CONFIG
 from .constants import (
@@ -189,6 +189,11 @@ def build_conda_package(kwargs) -> int:
         package="widgetron_app",
         channel=kwargs["pkg_output_dir"],
     )
+    if (not kwargs["skip_sbom"]) and CONSTRUCTOR_PARAMS.environment_file:
+        create_sbom(
+            CONSTRUCTOR_PARAMS.environment_file,
+            Path(kwargs["outdir"]) / "conda-sbom.json"
+        )
     return rc
 
 

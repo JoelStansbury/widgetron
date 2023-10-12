@@ -3,8 +3,9 @@ from typing import List
 
 import traitlets as T
 import yaml
+from constructor.conda_interface import cc_platform
+from .shell import SHELL
 
-from widgetron.utils.shell import SHELL
 
 from ..constants import REQUIRED_PKGS, WIN, DEFAULT_ICON
 from .conda import (
@@ -163,7 +164,22 @@ class ConstructorSettings(T.HasTraits):
         self.environment_file = str(
             (self.path / Path(self.explicit_lock).name).with_suffix(".txt")
         )
-        Path(self.environment_file).write_text(Path(self.explicit_lock).read_text())
+        content = Path(self.explicit_lock).read_text()
+        Path(self.environment_file).write_text(content)
+
+        # Check for local channels for channels_remap
+        lines = [x.strip() for x in content.strip().split("\n")]
+        urls = lines[lines.index("@EXPLICIT") + 1:]
+        channels = []
+        for url in urls:
+            for subdir in ["noarch", cc_platform]:
+                if f"/{subdir}/" in url:
+                    channel, package = url.split(f"/{subdir}/")
+                    channels.append(channel)
+                    break
+            else:
+                raise ValueError(f"Unexpected package url. ({url})")
+        self.channels = channels
 
     @T.validate("name")
     def _clean_name(self, proposal: T.Bunch) -> str:

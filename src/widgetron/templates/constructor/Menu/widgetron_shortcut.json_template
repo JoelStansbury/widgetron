@@ -9,5 +9,13 @@
             ],
             "icon": "${MENU_DIR}/icon.ico"
         }
+        {%- for shortcut in extra_shortcuts %},
+        {
+            "name": "{{shortcut.name}}",
+            "system": "{{shortcut.system}}",
+            "scriptarguments": {{shortcut.scriptarguments}},
+            "icon": "${MENU_DIR}/{{shortcut.icon}}"
+        }
+        {%- endfor %}
     ]
 }

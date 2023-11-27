@@ -44,6 +44,20 @@ version:
     flag: "-v"
     help: "Version number."
 
+extra_shortcuts: 
+    help: |
+        List of shortcut definitions. Each shortcut defined here will appear in
+        the same menu folder as the main app shortcut.
+        Example (run a CLI script)
+        [
+            {
+                "name": "Run Special Script",
+                "system": "cmd.exe /c",
+                "scriptarguments": ["python -m my_module my_cli_cmd"],
+                "icon": PATH_TO_ICON
+            }
+        ]
+
 environment:
     flag: "-env"
     help: |

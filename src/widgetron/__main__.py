@@ -71,6 +71,7 @@ def parse_arguments():
     CONSTRUCTOR_PARAMS.name = kwargs["name"]
     CONSTRUCTOR_PARAMS.version = kwargs["version"]
     CONSTRUCTOR_PARAMS.validate()
+    kwargs["extra_shortcuts"] = CONSTRUCTOR_PARAMS.extra_shortcuts
 
     return kwargs
 
@@ -192,7 +193,7 @@ def build_conda_package(kwargs) -> int:
     if (not kwargs["skip_sbom"]) and CONSTRUCTOR_PARAMS.environment_file:
         create_sbom(
             CONSTRUCTOR_PARAMS.environment_file,
-            Path(kwargs["outdir"]) / "conda-sbom.json"
+            Path(kwargs["outdir"]) / "conda-sbom.json",
         )
     return rc
 

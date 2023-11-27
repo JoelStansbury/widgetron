@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import List
 
@@ -20,7 +21,18 @@ from .conda import (
     is_local_channel,
 )
 
+REQUIRED_FILES = [
+    {"Menu/icon.ico": "Menu/icon.ico"},
+    {"Menu/widgetron_shortcut.json": "Menu/widgetron_shortcut.json"},
+]
 
+BAD_SHORTCUT_ERROR = """
+    The `extra_shortcuts` parameter must be a dictionary or list of dictionaries.
+    The syntax for defining a dictionary is the same in setup.cfg and in pyproject.toml.
+    If using setup.cfg, the dictionary is parsed using `json.loads`.
+    See the `extra_shortcuts` section of the help dialog `widgetron -h` for info about
+    required and optional values for each dictionary.
+"""
 class ConstructorSettings(T.HasTraits):
     install_missing: bool = T.Bool(False)
     path: Path | None = T.Instance(Path, allow_none=True, default_value=None)
@@ -32,6 +44,7 @@ class ConstructorSettings(T.HasTraits):
     version: str = T.Unicode()
     channels: tuple[str] = T.Tuple()
     specs: tuple[str] = T.Tuple()
+    extra_shortcuts: tuple[str] = T.Tuple()
     channels_remap: tuple[dict[str, str]] = T.Tuple()
     environment_file: str | None = T.Unicode(None, allow_none=True)
     environment: str | None = T.Unicode(None, allow_none=True)
@@ -47,12 +60,7 @@ class ConstructorSettings(T.HasTraits):
     default_prefix_all_users: str | None = T.Unicode(None, allow_none=True)
     register_python_default: bool = T.Bool(False)
     post_install: str = T.Unicode(None, allow_none=True)
-    extra_files: list = T.List(
-        default_value=[
-            {"Menu/icon.ico": "Menu/icon.ico"},
-            {"Menu/widgetron_shortcut.json": "Menu/widgetron_shortcut.json"},
-        ]
-    )
+    extra_files: list = T.Instance(klass=list, default_value=REQUIRED_FILES)
     icon_image: str | None = T.Unicode(None, allow_none=True)
 
     # Paths relative to construct.yaml
@@ -66,6 +74,14 @@ class ConstructorSettings(T.HasTraits):
     def __init__(self, **kw):
         kw["icon_image"] = kw.get("icon", str(DEFAULT_ICON))
         kw["specs"] = kw.get("dependencies", [])
+ 
+        if "extra_files" in kw:
+            kw["extra_files"] = [
+                {
+                    str(Path(k).resolve()): v for k,v in fm.items()
+                } for fm in kw["extra_files"]
+            ] + REQUIRED_FILES
+
         super().__init__(**{k: v for k, v in kw.items() if k in self.trait_names()})
         self.observe(self.render, names=self.trait_names())
 
@@ -143,12 +159,6 @@ class ConstructorSettings(T.HasTraits):
         SHELL.copy(self.icon_image, self.path / "icon.ico")
         return "icon.ico"
 
-    @T.validate("extra_files")
-    def _on_extra_files(self, proposal: T.Bunch) -> dict:
-        new = self.extra_files
-        new.update(**proposal.value)
-        return new
-
     @T.observe("environment_yaml")
     def _on_env_yaml(self, e: T.Bunch) -> None:
         # NOTE: It should be possible to build off of the yaml file directly
@@ -184,6 +194,37 @@ class ConstructorSettings(T.HasTraits):
     @T.validate("name")
     def _clean_name(self, proposal: T.Bunch) -> str:
         return "_".join(proposal.value.split())
+
+    @T.validate("extra_shortcuts")
+    def _handle_extra_shortcuts(self, proposal: T.Bunch) -> list:
+        """ Transforms shortcut definition to use relative path for icon.
+
+        Icon (if provided) is
+            - copied to the constructor tempdir (self.path / Menu)
+            - replaced with the path defined relative to the tempdir (self.path)
+        Script Arguments (if provieded) will have been parsed into a python list of strings
+            during parse_args.
+        """
+        (self.path / "Menu").mkdir(parents=True, exist_ok=True)
+        shortcuts = proposal.value
+        if isinstance(shortcuts, dict):
+            shortcuts = [shortcuts]
+        assert all([isinstance(sd, dict) for sd in shortcuts]), BAD_SHORTCUT_ERROR
+
+        for i, shortcut in enumerate(shortcuts):
+            if "icon" in shortcut:
+                p = Path(shortcut["icon"])
+                assert p.exists(), f"Icon not found ({p})"
+                # Rename Icon to prevent conflicting filenames
+                shortcut['icon'] = f"icon_{i}{p.suffix}"
+                # copy icon to constructor/Menu and tell constructor where to put it during installation
+                SHELL.copy(p, self.path / f"Menu/{shortcut['icon']}")
+                self.extra_files.append({f"Menu/{shortcut['icon']}": f"Menu/{shortcut['icon']}"})
+
+            for k, v in shortcut.items():
+                if not isinstance(v, str):
+                    shortcut[k] = json.dumps(v)
+        return shortcuts
 
     def add_dependency(self, package, channel, **package_attrs):
         if is_local_channel(channel):
@@ -256,6 +297,7 @@ class ConstructorSettings(T.HasTraits):
             "environment_yaml",
             "explicit_lock",
             "install_path",
+            "extra_shortcuts",
         }.union({"channels", "specs"} if self.environment_file else set())
         d = {
             k: v

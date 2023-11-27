@@ -1,0 +1,14 @@
+[tool.widgetron]
+notebook = App Name
+version = 0.1.0
+window_style = Normal
+outdir = output
+license_file = LICENSE
+install_path = c:/WTronExamples/App_Name
+explicit_lock = conda-win-64.lock
+skip_sbom = true
+extra_shortcuts = [
+    {"name": "test", "system":"cmd /c", "scriptarguments": ["${PREFIX}\\python"], "icon": "pdf.ico"},
+    {"name": "license", "system":"explorer", "scriptarguments": ["${MENU_DIR}\\LICENSE"], "icon": "pdf.ico"}
+    ]
+extra_files = [{"LICENSE": "Menu/LICENSE"}]

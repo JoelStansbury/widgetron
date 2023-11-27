@@ -32,8 +32,11 @@ def config_file():
                 data["channels"] = json.loads(data["channels"])
             if "dependencies" in data:
                 data["dependencies"] = json.loads(data["dependencies"])
+            if "extra_shortcuts" in data:
+                data["extra_shortcuts"] = json.loads(data["extra_shortcuts"])
+            if "extra_files" in data:
+                data["extra_files"] = json.loads(data["extra_files"])
             return data
-
 
     if Path("pyproject.toml").is_file():
         _toml = tomllib.load(Path("pyproject.toml").open("rb"))

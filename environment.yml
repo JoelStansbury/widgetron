@@ -4,8 +4,8 @@ channels:
   - conda-forge
 
 dependencies:
-  - boa
-  - constructor >=3.3, <4
+  - boa >=0.15.1
+  - constructor >=3.4.5
   - nodejs >18, <19
   - python <=3.11
   - yaml

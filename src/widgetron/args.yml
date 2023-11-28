@@ -244,3 +244,13 @@ default_prefix_all_users:
         Set default installation prefix for All Users installation.
         If not provided, the installation prefix for all users installation
         will be ${ALLUSERSPROFILE}\${NAME}. Windows only.
+
+# ELECTRON PARAMS
+electron_version:
+    default: ">=25"
+    help: |
+        Version of electron to build for
+electron_builder_version:
+    default: ">=24"
+    help: |
+        Version of electron-builder to use

@@ -186,5 +186,18 @@ def explicit_url(package: str, channel: str, with_hash=True, **package_attrs):
     return pkg["url"]
 
 
-def create_sbom(lock_file: str|Path, out_file: str|Path):
-    SHELL.call([JAKE, "sbom", "-f", str(lock_file), "-o", str(out_file), "--output-format", "json", "-t", "CONDA"])
+def create_sbom(lock_file: str | Path, out_file: str | Path):
+    SHELL.call(
+        [
+            JAKE,
+            "sbom",
+            "-f",
+            str(lock_file),
+            "-o",
+            str(out_file),
+            "--output-format",
+            "json",
+            "-t",
+            "CONDA",
+        ]
+    )

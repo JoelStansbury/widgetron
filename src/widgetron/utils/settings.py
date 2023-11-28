@@ -169,7 +169,7 @@ class ConstructorSettings(T.HasTraits):
 
         # Check for local channels for channels_remap
         lines = [x.strip() for x in content.strip().split("\n")]
-        urls = lines[lines.index("@EXPLICIT") + 1:]
+        urls = lines[lines.index("@EXPLICIT") + 1 :]
         channels = []
         for url in urls:
             for subdir in ["noarch", cc_platform]:

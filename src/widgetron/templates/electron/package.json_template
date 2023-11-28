@@ -24,8 +24,8 @@
   },
   "devDependencies": {
     "@cyclonedx/cyclonedx-npm": ">=1.9.2",
-    "electron": ">=25",
-    "electron-builder": ">=24"
+    "electron": "{{electron_version}}",
+    "electron-builder": "{{electron_builder_version}}"
   },
   "dependencies": {
     "electron-store": ">=8.1.0"

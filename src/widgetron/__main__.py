@@ -192,7 +192,7 @@ def build_conda_package(kwargs) -> int:
     if (not kwargs["skip_sbom"]) and CONSTRUCTOR_PARAMS.environment_file:
         create_sbom(
             CONSTRUCTOR_PARAMS.environment_file,
-            Path(kwargs["outdir"]) / "conda-sbom.json"
+            Path(kwargs["outdir"]) / "conda-sbom.json",
         )
     return rc
 

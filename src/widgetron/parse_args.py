@@ -34,7 +34,6 @@ def config_file():
                 data["dependencies"] = json.loads(data["dependencies"])
             return data
 
-
     if Path("pyproject.toml").is_file():
         _toml = tomllib.load(Path("pyproject.toml").open("rb"))
         if "tool" in _toml:

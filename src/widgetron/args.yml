@@ -247,10 +247,10 @@ default_prefix_all_users:
 
 # ELECTRON PARAMS
 electron_version:
-    default: ">25"
+    default: ">=25"
     help: |
         Version of electron to build for
 electron_builder_version:
-    default: ">24"
+    default: ">=24"
     help: |
         Version of electron-builder to use

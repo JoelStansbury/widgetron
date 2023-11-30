@@ -36,6 +36,7 @@ class ConstructorSettings(T.HasTraits):
     environment_file: str | None = T.Unicode(None, allow_none=True)
     environment: str | None = T.Unicode(None, allow_none=True)
 
+    company: str | None = T.Unicode(None, allow_none=True)
     installer_filename: str | None = T.Unicode(None, allow_none=True)
     header_image_text: str | None = T.Unicode(None, allow_none=True)
     default_image_color: str | None = T.Unicode(None, allow_none=True)

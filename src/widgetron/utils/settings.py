@@ -36,6 +36,8 @@ class ConstructorSettings(T.HasTraits):
     environment_file: str | None = T.Unicode(None, allow_none=True)
     environment: str | None = T.Unicode(None, allow_none=True)
 
+    company: str | None = T.Unicode(None, allow_none=True)
+    license_file: str | None = T.Unicode(None, allow_none=True)
     installer_filename: str | None = T.Unicode(None, allow_none=True)
     header_image_text: str | None = T.Unicode(None, allow_none=True)
     default_image_color: str | None = T.Unicode(None, allow_none=True)
@@ -235,6 +237,7 @@ class ConstructorSettings(T.HasTraits):
         "environment_yaml",
         "explicit_lock",
         "environment_file",
+        "license_file",
     )
     def _ensure_file_exists(self, proposal: T.Bunch):
         p = Path(proposal["value"])

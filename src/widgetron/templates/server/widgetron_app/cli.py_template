@@ -1,5 +1,6 @@
 import os
 import platform
+import sys
 import psutil
 import re
 import subprocess
@@ -19,15 +20,16 @@ os.environ["JUPYTER_PREFER_ENVIRONMENT_OVER_USER"] = "1"
 #: Silence warning about frozen modules
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"]="1"
 
-SYS = platform.uname().system
-if SYS == "Windows":
-    for z in HERE.glob("*.zip"):
-        ZipFile(z.name).extractall(z.stem)
-        z.unlink()
-else:
-    for z in HERE.glob("*.zip"):
-        subprocess.call(["unzip", str(z)])
-        z.unlink()
+def unpack():
+    SYS = platform.uname().system
+    if SYS == "Windows":
+        for z in HERE.glob("*.zip"):
+            ZipFile(z.name).extractall(z.stem)
+            z.unlink()
+    else:
+        for z in HERE.glob("*.zip"):
+            subprocess.call(["unzip", str(z)])
+            z.unlink()
 
 def redirect_output(server):
     while True:
@@ -73,6 +75,10 @@ class Server:
         self.port = self.url.split("localhost:")[1].split("/lab")[0]
 
 def main():
+    if sys.argv[1] == "unpack":
+        unpack()
+        sys.exit(0)
+    
     os.chdir("notebooks")
 
     server = Server()
@@ -87,6 +93,7 @@ def main():
         UI = str(next(HERE.rglob("widgetron")).resolve())
     if SYS == "Windows":
         UI = str(next(HERE.rglob("widgetron.exe")).resolve())
-    
+
     subprocess.call(UI)
     server.stop()
+    sys.exit(0)

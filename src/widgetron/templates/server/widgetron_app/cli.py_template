@@ -15,21 +15,26 @@ ARGS = [{% for part in server_command_args %}'{{part}}',{% endfor %}]
 HERE = Path(__file__).parent
 
 os.chdir(str(HERE))
+env = os.environ
 #: Help Jupyter ignore other .jupyter config paths
-os.environ["JUPYTER_PREFER_ENVIRONMENT_OVER_USER"] = "1"
+env["JUPYTER_PREFER_ENVIRONMENT_OVER_USER"] = "1"
 #: Silence warning about frozen modules
-os.environ["PYDEVD_DISABLE_FILE_VALIDATION"]="1"
+env["PYDEVD_DISABLE_FILE_VALIDATION"]="1"
+# Set app data location for the electron configuration settings
+appdata = Path(sys.prefix) / "etc"
+appdata.mkdir(exist_ok=True)
+env["widgetron_appdata"] = str(appdata)
 
-def unpack():
-    SYS = platform.uname().system
-    if SYS == "Windows":
-        for z in HERE.glob("*.zip"):
-            ZipFile(z.name).extractall(z.stem)
-            z.unlink()
-    else:
-        for z in HERE.glob("*.zip"):
-            subprocess.call(["unzip", str(z)])
-            z.unlink()
+SYS = platform.uname().system
+
+if SYS == "Windows":
+    for z in HERE.glob("*.zip"):
+        ZipFile(z.name).extractall(z.stem)
+        z.unlink()
+else:
+    for z in HERE.glob("*.zip"):
+        subprocess.call(["unzip", str(z)])
+        z.unlink()
 
 def redirect_output(server):
     while True:
@@ -44,7 +49,8 @@ class Server:
             [command, *ARGS,],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            env=env,
         )
         self.process = psutil.Process(self.server.pid)
         self.url = None
@@ -75,16 +81,13 @@ class Server:
         self.port = self.url.split("localhost:")[1].split("/lab")[0]
 
 def main():
-    if sys.argv[1] == "unpack":
-        unpack()
-        sys.exit(0)
-    
     os.chdir("notebooks")
 
     server = Server()
 
     url = f"http://localhost:{server.port}/lab/tree/{FILENAME}?token={server.token}"
-    os.environ["widgetron_url"] = url
+    env["widgetron_url"] = url
+    
 
     # open UI
     if SYS == "Darwin":
@@ -92,8 +95,8 @@ def main():
     if SYS == "Linux":
         UI = str(next(HERE.rglob("widgetron")).resolve())
     if SYS == "Windows":
-        UI = str(next(HERE.rglob("widgetron.exe")).resolve())
+        UI = str((HERE / "ui.exe").resolve())
 
-    subprocess.call(UI)
+    subprocess.call(UI, env=env)
     server.stop()
     sys.exit(0)

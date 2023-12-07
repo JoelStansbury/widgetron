@@ -113,7 +113,8 @@ def package_electron_app(kwargs):
         SHELL.call([NPM, "install", ".", "--no-optional"])
 
         SHELL.call([NPM, "run", "build"])
-
+        env = os.environ
+        env.update(**{"FETCH_LICENSE": "1"})
         if not kwargs["skip_sbom"]:
             sbom = Path(kwargs["outdir"]) / "npm-sbom.json"
             cmd = [
@@ -126,12 +127,12 @@ def package_electron_app(kwargs):
                 "--output-file",
                 f"{sbom}",
             ]
-            SHELL.call(cmd)
+            SHELL.call(cmd, env=env)
 
         if OSX or LINUX:
             dist = "dist"
         elif WIN:
-            dist = "dist/win-unpacked"
+            dist = "dist"
 
         SHELL.cd(dist)
 
@@ -140,7 +141,7 @@ def package_electron_app(kwargs):
             dst = "../../server/widgetron_app"
             SHELL.move(src, dst / src)
         elif WIN:
-            SHELL.zipdir(".", "../../../server/widgetron_app/ui.zip")
+            SHELL.move("ui.exe", "../../server/widgetron_app")
     finally:
         SHELL.cd(cwd)
 

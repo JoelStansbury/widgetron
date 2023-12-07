@@ -114,6 +114,9 @@ def package_electron_app(kwargs):
 
         SHELL.call([NPM, "run", "build"])
 
+        env = os.environ
+        env.update(**{"FETCH_LICENSE": "1"})
+
         if not kwargs["skip_sbom"]:
             sbom = Path(kwargs["outdir"]) / "npm-sbom.json"
             cmd = [
@@ -126,7 +129,7 @@ def package_electron_app(kwargs):
                 "--output-file",
                 f"{sbom}",
             ]
-            SHELL.call(cmd)
+            SHELL.call(cmd, env=env)
 
         if OSX or LINUX:
             dist = "dist"

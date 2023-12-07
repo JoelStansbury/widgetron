@@ -57,19 +57,19 @@ class Shell:
         if not self.mock:
             os.chdir(str(dir))
 
-    def zipdir(self, src, dst):
-        self._log(f"zip {src} {dst}\n")
-        if not self.mock:
-            with zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as ziph:
-                # ziph is zipfile handle
-                for root, dirs, files in os.walk(src):
-                    for file in files:
-                        ziph.write(
-                            os.path.join(root, file),
-                            os.path.relpath(
-                                os.path.join(root, file), os.path.join(src, "..")
-                            ),
-                        )
+    # def zipdir(self, src, dst):
+    #     self._log(f"zip {src} {dst}\n")
+    #     if not self.mock:
+    #         with zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as ziph:
+    #             # ziph is zipfile handle
+    #             for root, dirs, files in os.walk(src):
+    #                 for file in files:
+    #                     ziph.write(
+    #                         os.path.join(root, file),
+    #                         os.path.relpath(
+    #                             os.path.join(root, file), os.path.join(src, "..")
+    #                         ),
+    #                     )
 
 
 SHELL = Shell()

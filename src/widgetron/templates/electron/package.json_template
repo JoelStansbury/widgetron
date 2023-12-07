@@ -11,7 +11,10 @@
     "appId": "com.example.app",
     "win": {
       "icon": "build/icon.ico",
-      "target": "dir"
+      "target": ["portable"]
+    },
+    "portable": {
+      "artifactName": "ui.exe"
     },
     "linux": {
       "icon": "build/icon.png",
@@ -28,6 +31,5 @@
     "electron-builder": "{{electron_builder_version}}"
   },
   "dependencies": {
-    "electron-store": ">=8.1.0"
   }
 }

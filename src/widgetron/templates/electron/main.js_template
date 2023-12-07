@@ -1,8 +1,8 @@
 const { app, BrowserWindow, shell } = require('electron')
 const fs = require("fs")
 
-url = process.env.widgetron_url;
-appdata = process.env.widgetron_appdata.replace("\\", "/");
+url = process.env.WIDGETRON_URL;
+appdata = process.env.WIDGETRON_APPDATA.replace("\\", "/");
 url_whitelist = [
 {%- for url in url_whitelist %}
   "{{url}}",

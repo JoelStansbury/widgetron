@@ -1,9 +1,8 @@
-const { app, BrowserWindow, shell} = require('electron')
-const Config = require('electron-store')
-const config = new Config()
+const { app, BrowserWindow, shell } = require('electron')
+const fs = require("fs")
 
 url = process.env.widgetron_url;
-appdata = process.env.widgetron_appdata;
+appdata = process.env.widgetron_appdata.replace("\\", "/");
 url_whitelist = [
 {%- for url in url_whitelist %}
   "{{url}}",
@@ -14,6 +13,12 @@ domain_whitelist = [
   "{{domain}}",
 {%- endfor %}
 ]
+
+try {
+  config = JSON.parse(fs.readFileSync(`${appdata}/widgetron/config.json`))
+} catch {
+  config = {}
+}
 
 
 // https://www.electronjs.org/docs/latest/tutorial/sandbox#enabling-the-sandbox-globally
@@ -62,14 +67,18 @@ app.whenReady().then(() => {
     }
   }
   const win = new BrowserWindow(opts);
+
+  if (config.winBounds != undefined) {
+    win.setBounds(config.winBounds)
+  }
   
-  win.setBounds(config.get('winBounds'))
   if (url.startsWith("http://localhost:")) {
     win.loadURL(url);
   }
 
   win.on('close', function(e) {
-    config.set('winBounds', win.getBounds())
+    config.winBounds = win.getBounds()
+    fs.writeFileSync(`${appdata}/widgetron/config.json`, JSON.stringify(config))
     e.preventDefault();
     win.destroy();
   });

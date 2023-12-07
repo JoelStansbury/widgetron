@@ -1,5 +1,6 @@
 import os
 import platform
+import sys
 import psutil
 import re
 import subprocess
@@ -13,11 +14,17 @@ COMMAND = '{{ server_executable }}'
 ARGS = [{% for part in server_command_args %}'{{part}}',{% endfor %}]
 HERE = Path(__file__).parent
 
+appdata = Path(sys.prefix) / "etc"
+appdata.mkdir(exist_ok=True)
+
 os.chdir(str(HERE))
-#: Help Jupyter ignore other .jupyter config paths
-os.environ["JUPYTER_PREFER_ENVIRONMENT_OVER_USER"] = "1"
-#: Silence warning about frozen modules
-os.environ["PYDEVD_DISABLE_FILE_VALIDATION"]="1"
+env = os.environ
+
+env.update(
+    JUPYTER_PREFER_ENVIRONMENT_OVER_USER="1",  # Help Jupyter ignore other .jupyter config paths
+    PYDEVD_DISABLE_FILE_VALIDATION="1",  # Silence warning about frozen modules
+    WIDGETRON_APPDATA=str(appdata),  # Set appdata location for the electron configuration settings
+)
 
 SYS = platform.uname().system
 if SYS == "Windows":
@@ -42,7 +49,8 @@ class Server:
             [command, *ARGS,],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            env=env,
         )
         self.process = psutil.Process(self.server.pid)
         self.url = None
@@ -78,7 +86,7 @@ def main():
     server = Server()
 
     url = f"http://localhost:{server.port}/lab/tree/{FILENAME}?token={server.token}"
-    os.environ["widgetron_url"] = url
+    env["WIDGETRON_URL"] = url
 
     # open UI
     if SYS == "Darwin":
@@ -88,5 +96,5 @@ def main():
     if SYS == "Windows":
         UI = str(next(HERE.rglob("widgetron.exe")).resolve())
     
-    subprocess.call(UI)
+    subprocess.call(UI, env=env)
     server.stop()

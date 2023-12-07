@@ -115,7 +115,7 @@ def package_electron_app(kwargs):
         SHELL.call([NPM, "run", "build"])
 
         env = os.environ
-        env.update(**{"FETCH_LICENSE": "1"})
+        env["FETCH_LICENSE"] = "1"
 
         if not kwargs["skip_sbom"]:
             sbom = Path(kwargs["outdir"]) / "npm-sbom.json"

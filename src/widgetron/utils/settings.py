@@ -147,6 +147,7 @@ class ConstructorSettings(T.HasTraits):
 
     @T.validate("post_install")
     def _on_post_install_change(self, e: T.Bunch) -> None:
+        self.path.mkdir(parents=True, exist_ok=True)
         p = Path(self.post_install)
         SHELL.copy(str(p), self.path / p.name)
         return p.name

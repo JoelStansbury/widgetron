@@ -145,6 +145,13 @@ class ConstructorSettings(T.HasTraits):
         SHELL.copy(self.icon_image, self.path / "icon.ico")
         return "icon.ico"
 
+    @T.validate("post_install")
+    def _on_post_install_change(self, e: T.Bunch) -> None:
+        self.path.mkdir(parents=True, exist_ok=True)
+        p = Path(self.post_install)
+        SHELL.copy(str(p), self.path / p.name)
+        return p.name
+    
     @T.validate("extra_files")
     def _on_extra_files(self, proposal: T.Bunch) -> dict:
         new = self.extra_files
@@ -174,13 +181,14 @@ class ConstructorSettings(T.HasTraits):
         urls = lines[lines.index("@EXPLICIT") + 1 :]
         channels = []
         for url in urls:
-            for subdir in ["noarch", cc_platform]:
-                if f"/{subdir}/" in url:
-                    channel, package = url.split(f"/{subdir}/")
-                    channels.append(channel)
-                    break
-            else:
-                raise ValueError(f"Unexpected package url. ({url})")
+            if url.strip():
+                for subdir in ["noarch", cc_platform]:
+                    if f"/{subdir}/" in url:
+                        channel, package = url.split(f"/{subdir}/")
+                        channels.append(channel)
+                        break
+                else:
+                    raise ValueError(f"Unexpected package url. ({url})")
         self.channels = channels
 
     @T.validate("name")
@@ -238,6 +246,7 @@ class ConstructorSettings(T.HasTraits):
         "explicit_lock",
         "environment_file",
         "license_file",
+        "post_install",
     )
     def _ensure_file_exists(self, proposal: T.Bunch):
         p = Path(proposal["value"])

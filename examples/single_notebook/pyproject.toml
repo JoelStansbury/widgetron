@@ -8,3 +8,4 @@ license_file = "LICENSE"
 install_path = "c:/WTronExamples/App_Name"
 explicit_lock = "conda-linux-64.lock"
 skip_sbom = true
+post_install = "post_install.sh"

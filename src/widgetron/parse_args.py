@@ -83,6 +83,8 @@ def config():
         res["outdir"] = Path(res["outdir"]).resolve()
     if "temp_dir" in res:
         res["temp_dir"] = Path(res["temp_dir"]).resolve()
+    if "post_install" in res:
+        res["post_install"] = str(Path(res["post_install"]).resolve())
 
     # Apply defaults as specified in args.yml
     for k, v in defaults.items():

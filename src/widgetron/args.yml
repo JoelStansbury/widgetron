@@ -88,6 +88,11 @@ explicit_lock:
         This option is useful for debugging as you can test it with...
         `conda activate widgetron_temp_files/.env && python -m widgetron_app`
 
+post_install:
+    flag: "-pi"
+    help: |
+        Path to a script that is executed after the creation of the base environment.
+
 environment_yaml:
     flag: "-f"
     help: |
